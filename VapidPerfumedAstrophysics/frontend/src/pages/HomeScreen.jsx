@@ -59,7 +59,7 @@ function ImpactStrip({ impact }) {
   );
 }
 
-export default function HomeScreen() {
+export default function HomeScreen({ tab = 'home' }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
@@ -151,65 +151,99 @@ export default function HomeScreen() {
 
       {/* Content */}
       <div className="flex-1 scroll-area px-4 py-4 pb-24 flex flex-col gap-4">
-        {/* Impact strip */}
-        <ImpactStrip impact={impact} />
+        {tab === 'home' ? (
+          <>
+            {/* Impact strip */}
+            <ImpactStrip impact={impact} />
 
-        {/* My Projects */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-gray-900">{t('my_projects')}</h2>
-            <button
-              onClick={() => navigate('/projects/browse')}
-              className="flex items-center gap-1 text-sm font-medium rounded-lg px-3 py-1.5"
-              style={{ color: 'var(--color-primary)' }}
-            >
-              <span className="text-lg leading-none">+</span> {t('browse_projects')}
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <LoadingSpinner />
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="card text-center py-8 flex flex-col items-center gap-3">
-              <span className="text-gray-300"><FolderOpen size={48} strokeWidth={1.5} /></span>
-              <p className="text-gray-500 text-sm">{t('no_projects')}</p>
-              <p className="text-gray-400 text-xs">{t('join_project')}</p>
+            {/* Achievements teaser */}
+            {impact?.achievement_count > 0 && (
               <button
-                className="btn-primary max-w-[200px] mt-2"
-                onClick={() => navigate('/projects/browse')}
+                className="card text-left flex items-center gap-3 active:scale-95 transition-transform"
+                onClick={() => navigate('/achievements')}
               >
-                {t('browse_projects')}
+                <span className="text-amber-500"><Trophy size={32} /></span>
+                <div>
+                  <p className="font-semibold text-sm text-gray-900">
+                    {impact.achievement_count} Achievement{impact.achievement_count !== 1 ? 's' : ''} unlocked
+                  </p>
+                  <p className="text-xs text-gray-400">Tap to see your badges →</p>
+                </div>
+              </button>
+            )}
+
+            {/* Recent Projects */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-gray-900">{t('my_projects')}</h2>
+                <button
+                  onClick={() => navigate('/projects')}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                >
+                  View all →
+                </button>
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center py-4"><LoadingSpinner /></div>
+              ) : projects.length === 0 ? (
+                <div className="card text-center py-6 flex flex-col items-center gap-2">
+                  <span className="text-gray-300"><FolderOpen size={32} strokeWidth={1.5} /></span>
+                  <p className="text-gray-500 text-sm">{t('no_projects')}</p>
+                  <button className="btn-primary max-w-[200px] mt-2 text-xs py-2" onClick={() => navigate('/projects/browse')}>
+                    {t('browse_projects')}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {projects.slice(0, 3).map(p => (
+                    <ProjectCard
+                      key={p.id}
+                      project={p}
+                      onClick={() => navigate(`/projects/${p.id}`)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Projects Tab */}
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-bold text-gray-900">My Projects</h1>
+              <button
+                onClick={() => navigate('/projects/browse')}
+                className="flex items-center gap-1 text-sm font-medium rounded-lg px-3 py-1.5"
+                style={{ color: 'var(--color-primary)', backgroundColor: 'var(--color-primary-light)' }}
+              >
+                <span className="text-lg leading-none">+</span> Browse
               </button>
             </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {projects.map(p => (
-                <ProjectCard
-                  key={p.id}
-                  project={p}
-                  onClick={() => navigate(`/projects/${p.id}`)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Achievements teaser */}
-        {impact?.achievement_count > 0 && (
-          <button
-            className="card text-left flex items-center gap-3"
-            onClick={() => navigate('/achievements')}
-          >
-            <span className="text-amber-500"><Trophy size={32} /></span>
-            <div>
-              <p className="font-semibold text-sm text-gray-900">
-                {impact.achievement_count} Achievement{impact.achievement_count !== 1 ? 's' : ''} unlocked
-              </p>
-              <p className="text-xs text-gray-400">Tap to see your badges →</p>
-            </div>
-          </button>
+            {loading ? (
+              <div className="flex justify-center py-12"><LoadingSpinner /></div>
+            ) : projects.length === 0 ? (
+              <div className="card text-center py-12 flex flex-col items-center gap-4">
+                <span className="text-gray-300"><FolderOpen size={48} strokeWidth={1.5} /></span>
+                <p className="text-gray-500 text-sm">{t('no_projects')}</p>
+                <p className="text-gray-400 text-xs max-w-[200px]">{t('join_project')}</p>
+                <button className="btn-primary max-w-[200px] mt-2" onClick={() => navigate('/projects/browse')}>
+                  {t('browse_projects')}
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {projects.map(p => (
+                  <ProjectCard
+                    key={p.id}
+                    project={p}
+                    onClick={() => navigate(`/projects/${p.id}`)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 

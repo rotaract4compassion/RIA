@@ -6,6 +6,110 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 
 const FIELD_TYPES = ['text', 'number', 'select', 'boolean'];
 
+const TEMPLATES = [
+  {
+    name: 'Community Health',
+    icon: '🏥',
+    description: 'Track health outreach activities, beneficiaries, and outcomes',
+    fields: [
+      { id: 'activity', label: 'Activity / Service Provided', label_sw: 'Shughuli / Huduma Iliyotolewa', type: 'text', required: true, placeholder: 'e.g. Blood pressure screening' },
+      { id: 'beneficiaries', label: 'Number of Beneficiaries', label_sw: 'Idadi ya Wanufaika', type: 'number', required: true, placeholder: '0' },
+      { id: 'gender_split', label: 'Gender split (approx. % female)', label_sw: 'Mgawanyo wa jinsia (% ya kike)', type: 'number', required: false, placeholder: '50' },
+      { id: 'health_area', label: 'Health Area', label_sw: 'Eneo la Afya', type: 'select', required: true, options: [
+        { value: 'maternal', label: 'Maternal & Child Health' },
+        { value: 'disease_prevention', label: 'Disease Prevention' },
+        { value: 'mental_health', label: 'Mental Health' },
+        { value: 'nutrition', label: 'Nutrition' },
+        { value: 'other', label: 'Other' },
+      ]},
+      { id: 'challenges', label: 'Challenges Encountered', label_sw: 'Changamoto Zilizojitokeza', type: 'text', required: false, placeholder: 'Any difficulties during this activity' },
+      { id: 'minutes_of_impact', label: 'Duration (minutes)', label_sw: 'Muda (dakika)', type: 'number', required: true, placeholder: '60' },
+    ],
+  },
+  {
+    name: 'Education & Literacy',
+    icon: '📚',
+    description: 'Document learning sessions, tutoring, and school support',
+    fields: [
+      { id: 'session_topic', label: 'Session Topic', label_sw: 'Mada ya Kipindi', type: 'text', required: true, placeholder: 'e.g. Mathematics tutoring' },
+      { id: 'students_reached', label: 'Students Reached', label_sw: 'Wanafunzi Waliofikiwa', type: 'number', required: true, placeholder: '0' },
+      { id: 'education_level', label: 'Education Level', label_sw: 'Kiwango cha Elimu', type: 'select', required: true, options: [
+        { value: 'primary', label: 'Primary School' },
+        { value: 'secondary', label: 'Secondary School' },
+        { value: 'university', label: 'University / College' },
+        { value: 'adult', label: 'Adult Education' },
+      ]},
+      { id: 'materials_provided', label: 'Were materials provided?', label_sw: 'Je, vifaa vilitolewa?', type: 'boolean', required: true },
+      { id: 'notes', label: 'Notes / Observations', label_sw: 'Maelezo / Uchunguzi', type: 'text', required: false, placeholder: '' },
+      { id: 'minutes_of_impact', label: 'Duration (minutes)', label_sw: 'Muda (dakika)', type: 'number', required: true, placeholder: '60' },
+    ],
+  },
+  {
+    name: 'WASH (Water, Sanitation & Hygiene)',
+    icon: '🚰',
+    description: 'Log water, sanitation, and hygiene interventions',
+    fields: [
+      { id: 'intervention_type', label: 'Intervention Type', label_sw: 'Aina ya Uingiliaji', type: 'select', required: true, options: [
+        { value: 'water_supply', label: 'Water Supply' },
+        { value: 'sanitation', label: 'Sanitation Facilities' },
+        { value: 'hygiene_education', label: 'Hygiene Education' },
+        { value: 'cleanup', label: 'Community Cleanup' },
+      ]},
+      { id: 'people_served', label: 'People Served', label_sw: 'Watu Waliohudumiwa', type: 'number', required: true, placeholder: '0' },
+      { id: 'description', label: 'Activity Description', label_sw: 'Maelezo ya Shughuli', type: 'text', required: true, placeholder: 'Describe what was done' },
+      { id: 'sustainable', label: 'Is this intervention sustainable?', label_sw: 'Je, uingiliaji huu ni endelevu?', type: 'boolean', required: false },
+      { id: 'minutes_of_impact', label: 'Duration (minutes)', label_sw: 'Muda (dakika)', type: 'number', required: true, placeholder: '60' },
+    ],
+  },
+  {
+    name: 'Environmental',
+    icon: '🌱',
+    description: 'Track tree planting, cleanups, and sustainability efforts',
+    fields: [
+      { id: 'activity_type', label: 'Activity', label_sw: 'Shughuli', type: 'select', required: true, options: [
+        { value: 'tree_planting', label: 'Tree Planting' },
+        { value: 'cleanup', label: 'Environmental Cleanup' },
+        { value: 'awareness', label: 'Awareness Campaign' },
+        { value: 'recycling', label: 'Recycling Initiative' },
+      ]},
+      { id: 'participants', label: 'Volunteers Involved', label_sw: 'Watu Walioshiriki', type: 'number', required: true, placeholder: '0' },
+      { id: 'items_count', label: 'Items count (trees planted, bags collected, etc.)', label_sw: 'Idadi ya vitu (miti, mifuko, nk)', type: 'number', required: false, placeholder: '0' },
+      { id: 'notes', label: 'Notes', label_sw: 'Maelezo', type: 'text', required: false, placeholder: '' },
+      { id: 'minutes_of_impact', label: 'Duration (minutes)', label_sw: 'Muda (dakika)', type: 'number', required: true, placeholder: '60' },
+    ],
+  },
+  {
+    name: 'Event Feedback',
+    icon: '🎤',
+    description: 'Collect attendee feedback after events or workshops',
+    fields: [
+      { id: 'event_name', label: 'Event Name', label_sw: 'Jina la Tukio', type: 'text', required: true, placeholder: 'e.g. Youth Leadership Workshop' },
+      { id: 'attendees', label: 'Number of Attendees', label_sw: 'Idadi ya Washiriki', type: 'number', required: true, placeholder: '0' },
+      { id: 'rating', label: 'Overall Rating', label_sw: 'Ukadiriaji wa Jumla', type: 'select', required: true, options: [
+        { value: '5', label: '⭐ Excellent' },
+        { value: '4', label: '⭐ Good' },
+        { value: '3', label: '⭐ Average' },
+        { value: '2', label: '⭐ Below Average' },
+        { value: '1', label: '⭐ Poor' },
+      ]},
+      { id: 'would_attend_again', label: 'Would you attend again?', label_sw: 'Ungeshiriki tena?', type: 'boolean', required: true },
+      { id: 'feedback', label: 'Open Feedback', label_sw: 'Maoni ya Ziada', type: 'text', required: false, placeholder: 'What could be improved?' },
+      { id: 'minutes_of_impact', label: 'Duration (minutes)', label_sw: 'Muda (dakika)', type: 'number', required: true, placeholder: '90' },
+    ],
+  },
+  {
+    name: 'General Survey',
+    icon: '📋',
+    description: 'A simple starting point with basic fields',
+    fields: [
+      { id: 'description', label: 'Description of Activity', label_sw: 'Maelezo ya Shughuli', type: 'text', required: true, placeholder: 'What did you do?' },
+      { id: 'people_reached', label: 'People Reached', label_sw: 'Watu Waliofikiwa', type: 'number', required: true, placeholder: '0' },
+      { id: 'outcome', label: 'Outcome / Impact', label_sw: 'Matokeo / Athari', type: 'text', required: false, placeholder: 'What was the result?' },
+      { id: 'minutes_of_impact', label: 'Duration (minutes)', label_sw: 'Muda (dakika)', type: 'number', required: true, placeholder: '60' },
+    ],
+  },
+];
+
 function QuestionBuilder({ questions, onChange }) {
   function addQuestion() {
     onChange([...questions, {

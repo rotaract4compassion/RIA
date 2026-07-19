@@ -168,11 +168,17 @@ export default function QuestionnaireScreen() {
       try {
         let q = null;
         try {
-          q = await api.get(`/questionnaires/${projectId}/current`);
-          await offlineDb.cacheQuestionnaire(projectId, q);
+          const raw = await api.get(`/questionnaires/${projectId}/current`);
+          await offlineDb.cacheQuestionnaire(projectId, raw);
+          // Merge nested schema into top-level so we can access both
+          // q.id (questionnaire_version_id) AND q.fields, q.location_enabled
+          q = { id: raw.id, ...raw.schema };
         } catch {
           const cached = await offlineDb.getCachedQuestionnaire(projectId);
-          if (cached) q = cached.schema;
+          if (cached) {
+            const raw = cached.schema;
+            q = raw?.schema ? { id: raw.id, ...raw.schema } : raw;
+          }
         }
         setSchema(q);
 
