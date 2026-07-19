@@ -183,21 +183,44 @@ function QuestionBuilder({ questions, onChange }) {
 
           {/* Options (if select) */}
           {q.type === 'select' && (
-            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-2">Options (value | label)</label>
-              <textarea
-                rows={2}
-                value={(q.options || []).map(o => `${o.value}|${o.label}`).join('\n')}
-                onChange={e => {
-                  const opts = e.target.value.split('\n').filter(Boolean).map(line => {
-                    const [value, label] = line.split('|');
-                    return { value: value?.trim(), label: (label || value)?.trim() };
-                  });
-                  updateQuestion(i, { options: opts });
+            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 flex flex-col gap-2">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-1">Multiple Choice Options</label>
+              {(q.options || []).map((opt, optIdx) => (
+                <div key={optIdx} className="flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={opt.value} 
+                    onChange={e => {
+                      const newOpts = [...(q.options || [])];
+                      // For simplicity, we keep value and label the same for user-defined options
+                      newOpts[optIdx] = { value: e.target.value, label: e.target.value }; 
+                      updateQuestion(i, { options: newOpts });
+                    }}
+                    placeholder={`Option ${optIdx + 1}...`}
+                    className="flex-1 text-sm bg-white border border-gray-200 rounded-md px-3 py-1.5 focus:border-[var(--color-primary)] focus:ring-0 placeholder-gray-300"
+                  />
+                  <button 
+                    onClick={() => {
+                      const newOpts = [...(q.options || [])];
+                      newOpts.splice(optIdx, 1);
+                      updateQuestion(i, { options: newOpts });
+                    }}
+                    className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
+                    title="Remove option"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              <button 
+                onClick={() => {
+                  const newOpts = [...(q.options || []), { value: '', label: '' }];
+                  updateQuestion(i, { options: newOpts });
                 }}
-                placeholder="yes | Yes&#10;no | No"
-                className="w-full text-sm font-mono bg-transparent border-0 focus:ring-0 p-0 resize-none text-gray-700 placeholder-gray-300"
-              />
+                className="text-xs font-semibold text-[var(--color-primary)] flex items-center gap-1 mt-1 hover:underline w-max"
+              >
+                <Plus size={14} /> Add Option
+              </button>
             </div>
           )}
 
