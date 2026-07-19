@@ -14,17 +14,18 @@ export default function AdminAnalytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await api.get('/submissions/admin/analytics/global');
-        setData(res);
-      } catch (err) {
-        setError(err.message);
-      }
-      setLoading(false);
+  const loadAnalytics = async () => {
+    try {
+      const res = await api.get('/submissions/admin/analytics/global');
+      setData(res);
+    } catch (err) {
+      setError(err.message);
     }
-    load();
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadAnalytics();
   }, []);
 
   if (loading) return <div className="p-12 flex justify-center"><LoadingSpinner /></div>;

@@ -130,11 +130,11 @@ router.get('/admin/analytics/global', requireAdmin, async (req, res) => {
       )
     ]);
       res.json({
-        trend: trendRes.rows,
+        trends: trendRes.rows,
         regions: regionRes.rows,
         projects: projectRes.rows,
         totals: totalsRes.rows[0],
-        heatmaps: heatmapRes.rows
+        heatmap: heatmapRes.rows
       });
     } catch (err) {
       console.error(err);
