@@ -38,7 +38,7 @@ export default function SplashScreen() {
         {/* Rotaract lockup */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 splash-a">
           <img
-            src="/partners/rotaract-muhimbili-icon.svg"
+            src="/partners/rotaract-muhimbili-icon.png"
             alt="Rotaract wheel"
             className="w-28 h-28 drop-shadow-sm"
           />
@@ -52,7 +52,7 @@ export default function SplashScreen() {
         {/* Rotary lockup */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 splash-b">
           <img
-            src="/partners/rotary-international-icon.svg"
+            src="/partners/rotary-international-icon.png"
             alt="Rotary wheel"
             className="w-28 h-28 drop-shadow-sm"
           />
