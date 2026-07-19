@@ -9,7 +9,6 @@ const FIELD_TYPES = ['text', 'number', 'select', 'boolean'];
 const TEMPLATES = [
   {
     name: 'Community Health',
-    icon: '🏥',
     description: 'Track health outreach activities, beneficiaries, and outcomes',
     fields: [
       { id: 'activity', label: 'Activity / Service Provided', label_sw: 'Shughuli / Huduma Iliyotolewa', type: 'text', required: true, placeholder: 'e.g. Blood pressure screening' },
@@ -28,7 +27,6 @@ const TEMPLATES = [
   },
   {
     name: 'Education & Literacy',
-    icon: '📚',
     description: 'Document learning sessions, tutoring, and school support',
     fields: [
       { id: 'session_topic', label: 'Session Topic', label_sw: 'Mada ya Kipindi', type: 'text', required: true, placeholder: 'e.g. Mathematics tutoring' },
@@ -46,7 +44,6 @@ const TEMPLATES = [
   },
   {
     name: 'WASH (Water, Sanitation & Hygiene)',
-    icon: '🚰',
     description: 'Log water, sanitation, and hygiene interventions',
     fields: [
       { id: 'intervention_type', label: 'Intervention Type', label_sw: 'Aina ya Uingiliaji', type: 'select', required: true, options: [
@@ -63,7 +60,6 @@ const TEMPLATES = [
   },
   {
     name: 'Environmental',
-    icon: '🌱',
     description: 'Track tree planting, cleanups, and sustainability efforts',
     fields: [
       { id: 'activity_type', label: 'Activity', label_sw: 'Shughuli', type: 'select', required: true, options: [
@@ -80,17 +76,16 @@ const TEMPLATES = [
   },
   {
     name: 'Event Feedback',
-    icon: '🎤',
     description: 'Collect attendee feedback after events or workshops',
     fields: [
       { id: 'event_name', label: 'Event Name', label_sw: 'Jina la Tukio', type: 'text', required: true, placeholder: 'e.g. Youth Leadership Workshop' },
       { id: 'attendees', label: 'Number of Attendees', label_sw: 'Idadi ya Washiriki', type: 'number', required: true, placeholder: '0' },
       { id: 'rating', label: 'Overall Rating', label_sw: 'Ukadiriaji wa Jumla', type: 'select', required: true, options: [
-        { value: '5', label: '⭐ Excellent' },
-        { value: '4', label: '⭐ Good' },
-        { value: '3', label: '⭐ Average' },
-        { value: '2', label: '⭐ Below Average' },
-        { value: '1', label: '⭐ Poor' },
+        { value: '5', label: '5 - Excellent' },
+        { value: '4', label: '4 - Good' },
+        { value: '3', label: '3 - Average' },
+        { value: '2', label: '2 - Below Average' },
+        { value: '1', label: '1 - Poor' },
       ]},
       { id: 'would_attend_again', label: 'Would you attend again?', label_sw: 'Ungeshiriki tena?', type: 'boolean', required: true },
       { id: 'feedback', label: 'Open Feedback', label_sw: 'Maoni ya Ziada', type: 'text', required: false, placeholder: 'What could be improved?' },
@@ -99,7 +94,6 @@ const TEMPLATES = [
   },
   {
     name: 'General Survey',
-    icon: '📋',
     description: 'A simple starting point with basic fields',
     fields: [
       { id: 'description', label: 'Description of Activity', label_sw: 'Maelezo ya Shughuli', type: 'text', required: true, placeholder: 'What did you do?' },

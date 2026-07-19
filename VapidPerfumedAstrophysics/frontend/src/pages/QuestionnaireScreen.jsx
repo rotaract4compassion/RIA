@@ -210,6 +210,8 @@ export default function QuestionnaireScreen() {
     if (operator === 'eq') return String(ans) === String(value);
     if (operator === 'neq') return String(ans) !== String(value);
     if (operator === 'gt') return Number(ans) > Number(value);
+    if (operator === 'lt') return Number(ans) < Number(value);
+    if (operator === 'contains') return String(ans || '').toLowerCase().includes(String(value || '').toLowerCase());
     return true;
   }) : [];
 

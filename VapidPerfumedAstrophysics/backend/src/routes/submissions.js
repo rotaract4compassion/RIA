@@ -156,12 +156,6 @@ router.delete('/admin/purge', requireAdmin, async (req, res) => {
       `DELETE FROM submissions WHERE submitted_at < NOW() - $1::interval RETURNING id`,
       [`${days} days`]
     );
-    // Audit log
-    await db.query(
-      `INSERT INTO admin_audit_log (actor_admin_id, action, target_type, metadata)
-       VALUES ($1, $2, $3, $4)`,
-      [req.adminId, 'purge_data', 'submissions', JSON.stringify({ days, count: result.rowCount })]
-    );
     res.json({ message: `Purged ${result.rowCount} submissions older than ${days} days`, count: result.rowCount });
   } catch (err) {
     console.error(err);
