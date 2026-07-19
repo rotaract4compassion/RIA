@@ -71,10 +71,10 @@ export default function WelcomeScreen() {
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
         style={{ 
           backgroundImage: 'url(/images/hero-bg.png)',
-          opacity: bgLoaded ? 0.4 : 0
+          opacity: bgLoaded ? 0.6 : 0
         }}
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-gray-900/95 via-gray-900/80 to-gray-900/95" />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/85" />
 
       {/* Navigation Bar */}
       <div className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-gradient-to-b from-gray-900/80 to-transparent">
@@ -132,52 +132,40 @@ export default function WelcomeScreen() {
         </div>
 
         {/* Scrolling Story Sections */}
-        <div className="px-6 py-20 flex flex-col gap-32 max-w-md mx-auto w-full">
+        <div className="px-6 py-20 flex flex-col gap-24 max-w-md mx-auto w-full">
           
           <Reveal>
             <h2 className="text-2xl font-bold text-white mb-4">The Gap</h2>
             <p className="text-lg text-gray-300 leading-relaxed">
               {isSw 
                 ? 'Vilabu vya Rotary na Rotaract nchini Tanzania vinafanya kazi kubwa. Lakini ushahidi mara nyingi umetawanyika.' 
-                : 'Rotary and Rotaract clubs across Tanzania do real work. Boreholes, health screenings, hygiene programs. But the proof is often scattered across separate club sites and one-off writeups.'}
+                : 'Rotary and Rotaract clubs across Tanzania do real work. Boreholes, health screenings, hygiene programs. But when it\'s time to show a funder what happened, the proof is usually gone.'}
             </p>
           </Reveal>
 
           <Reveal>
-            <div className="p-6 rounded-3xl bg-blue-900/30 border border-blue-500/20 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-4">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              </div>
-              <h2 className="text-2xl font-bold text-blue-300 mb-4">Built for the Field</h2>
-              <p className="text-lg text-blue-100/70 leading-relaxed">
-                {isSw 
-                  ? 'Inafanya kazi bila intaneti, inajisawazisha mtandao unaporudi, na ni rahisi kutumia.' 
-                  : 'It works fully offline, syncs when signal comes back, runs on free tier hosting to stay cheap, and stays mobile and simple enough that volunteers actually use it.'}
-              </p>
-            </div>
+            <h2 className="text-2xl font-bold text-white mb-4">Built for the Field</h2>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              {isSw 
+                ? 'Inafanya kazi bila intaneti, inajisawazisha mtandao unaporudi, na ni rahisi kutumia.' 
+                : 'Works offline. Syncs when signal comes back. Runs on free hosting so clubs only cover infrastructure costs. Simple enough that volunteers actually open it.'}
+            </p>
           </Reveal>
 
           <Reveal>
-            <div className="p-6 rounded-3xl bg-pink-900/30 border border-pink-500/20 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center mb-4">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-              </div>
-              <h2 className="text-2xl font-bold text-pink-300 mb-4">Make it count</h2>
-              <p className="text-lg text-pink-100/70 leading-relaxed">
-                {isSw 
-                  ? 'Rekodi dakika za mchango wako, fungua mikoa mipya, na upande kwenye ubao wa viongozi.' 
-                  : 'A bit of gamification too. Minutes of impact, regions reached, a leaderboard—because showing up should feel like something.'}
-              </p>
-            </div>
+            <h2 className="text-2xl font-bold text-white mb-4">Make it Count</h2>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              {isSw 
+                ? 'Rekodi dakika za mchango wako, fungua mikoa mipya, na upande kwenye ubao wa viongozi.' 
+                : 'Track your minutes of impact. Reach new regions. Climb the leaderboard. Showing up should feel like something.'}
+            </p>
           </Reveal>
 
           <Reveal>
-            <div className="p-6 rounded-3xl bg-amber-900/30 border border-amber-500/20 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold text-amber-300 mb-4">One app, two identities</h2>
-              <p className="text-lg text-amber-100/70 leading-relaxed">
-                Navy and gold for Rotary. Hot pink and white for Rotaract. The app knows which one to show you based on your club.
-              </p>
-            </div>
+            <h2 className="text-2xl font-bold text-white mb-4">One App, Two Identities</h2>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              Navy and gold for Rotary. Hot pink and white for Rotaract. The app knows which one to show you based on your club.
+            </p>
           </Reveal>
 
         </div>
@@ -197,12 +185,12 @@ export default function WelcomeScreen() {
 
             {/* Admin Link & Partner Logos */}
             <div className="flex flex-col items-center gap-8">
-              <div className="flex flex-col items-center gap-4 opacity-50">
-                <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Partners under R4C</span>
-                <div className="flex items-center justify-center gap-6 brightness-0 invert opacity-80">
-                  <img src={logos.nama_labs} alt="Nama Labs" className="h-6 object-contain" />
-                  <img src={logos.rotaract_tanzania} alt="Rotaract Tanzania" className="h-6 object-contain" />
-                  <img src={logos.rotaract_muhimbili} alt="Rotaract Muhimbili" className="h-6 object-contain" />
+              <div className="flex flex-col items-center gap-4">
+                <span className="text-[10px] text-gray-500 tracking-wider uppercase font-medium">Partners under R4C</span>
+                <div className="flex items-center justify-center gap-6">
+                  <img src={logos.nama_labs} alt="Nama Labs" className="h-8 object-contain rounded" />
+                  <img src={logos.rotaract_tanzania} alt="Rotaract Tanzania" className="h-8 object-contain rounded" />
+                  <img src={logos.rotaract_muhimbili} alt="Rotaract Muhimbili" className="h-8 object-contain rounded" />
                 </div>
               </div>
               <button onClick={() => navigate('/admin/login')} className="text-xs font-semibold text-gray-500 hover:text-white transition-colors">
