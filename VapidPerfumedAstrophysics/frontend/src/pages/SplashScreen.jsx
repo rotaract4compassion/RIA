@@ -64,15 +64,10 @@ export default function SplashScreen() {
         </div>
       </div>
 
-      {/* Partner strip */}
+      {/* Built by strip */}
       <div className="absolute bottom-8 flex flex-col items-center gap-2 opacity-50">
-        <p className="text-[10px] text-gray-400 tracking-wider uppercase">In partnership with</p>
-        <div className="flex items-center gap-4">
-          <img src="/partners/rotary-international-icon.svg" alt="Rotary International" className="w-6 h-6 object-contain" />
-          <img src="/partners/rotaract-tanzania-icon.svg" alt="Rotaract Tanzania" className="w-6 h-6 object-contain" />
-          <img src="/partners/rotaract-muhimbili-icon.svg" alt="Rotaract Muhimbili" className="w-6 h-6 object-contain" />
-          <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="w-6 h-6 object-contain" />
-        </div>
+        <p className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Built by</p>
+        <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="h-5 object-contain" />
       </div>
     </div>
   );
