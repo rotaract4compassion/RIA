@@ -183,6 +183,51 @@ router.get('/admin/:projectId', requireAdmin, async (req, res) => {
   res.json(result.rows);
 });
 
+// GET /api/submissions/admin/:projectId/export — CSV download
+router.get('/admin/:projectId/export', requireAdmin, async (req, res) => {
+  const { projectId } = req.params;
+  try {
+    const result = await db.query(
+      `SELECT s.id, u.name as user_name, u.club as user_club, s.answers, s.region,
+              s.location_lat, s.location_lng, s.submitted_at, s.is_duplicate_flag
+       FROM submissions s
+       JOIN users u ON u.id = s.user_id
+       WHERE s.project_id = $1
+       ORDER BY s.submitted_at DESC`,
+      [projectId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(200).send('No submissions yet');
+    }
+    // Collect all answer keys across all submissions
+    const allKeys = new Set();
+    result.rows.forEach(r => {
+      if (r.answers && typeof r.answers === 'object') {
+        Object.keys(r.answers).forEach(k => allKeys.add(k));
+      }
+    });
+    const answerKeys = Array.from(allKeys).sort();
+    const headers = ['id', 'user_name', 'user_club', 'region', 'lat', 'lng', 'submitted_at', 'duplicate_flag', ...answerKeys];
+    const escape = (v) => {
+      if (v === null || v === undefined) return '';
+      const s = String(v).replace(/"/g, '""');
+      return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s}"` : s;
+    };
+    const csvRows = [headers.join(',')];
+    result.rows.forEach(r => {
+      const base = [r.id, r.user_name, r.user_club, r.region, r.location_lat, r.location_lng, r.submitted_at, r.is_duplicate_flag];
+      const answerVals = answerKeys.map(k => r.answers?.[k] ?? '');
+      csvRows.push([...base, ...answerVals].map(escape).join(','));
+    });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="submissions_${projectId}.csv"`);
+    res.send(csvRows.join('\n'));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Export failed' });
+  }
+});
+
 // GET /api/submissions/admin/:projectId/analytics — quick analytics
 router.get('/admin/:projectId/analytics', requireAdmin, async (req, res) => {
   const { projectId } = req.params;
