@@ -5,11 +5,12 @@ import { useAuth } from '../store/auth';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { BarChart2, Clock, Map, Trophy, Medal } from 'lucide-react';
 
 const METRICS = [
-  { key: 'submissions', labelKey: 'metric_submissions', emoji: '📊' },
-  { key: 'minutes', labelKey: 'metric_minutes', emoji: '⏱️' },
-  { key: 'regions', labelKey: 'metric_regions', emoji: '🗺️' },
+  { key: 'submissions', labelKey: 'metric_submissions', icon: <BarChart2 size={16} /> },
+  { key: 'minutes', labelKey: 'metric_minutes', icon: <Clock size={16} /> },
+  { key: 'regions', labelKey: 'metric_regions', icon: <Map size={16} /> },
 ];
 
 const UNIT_LABELS = {
@@ -50,10 +51,10 @@ export default function LeaderboardScreen() {
   useEffect(() => { load(); }, [load]);
 
   function rankBadge(rank) {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    return `#${rank}`;
+    if (rank === 1) return <Medal className="text-yellow-500" size={24} />;
+    if (rank === 2) return <Medal className="text-gray-400" size={24} />;
+    if (rank === 3) return <Medal className="text-amber-600" size={24} />;
+    return <span className="text-sm font-bold text-gray-500">#{rank}</span>;
   }
 
   const myEntry = data.find(r => r.is_me);
@@ -68,7 +69,9 @@ export default function LeaderboardScreen() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="font-bold text-xl text-gray-900">🏆 {t('leaderboard')}</h1>
+          <h1 className="font-bold text-xl text-gray-900 flex items-center gap-2">
+            <Trophy className="text-amber-500" size={24} /> {t('leaderboard')}
+          </h1>
         </div>
 
         {/* View toggle: Individual / Club */}
@@ -106,7 +109,7 @@ export default function LeaderboardScreen() {
 
       {/* Metric selector */}
       <div className="bg-white border-b border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto">
-        {METRICS.map(({ key, labelKey, emoji }) => (
+        {METRICS.map(({ key, labelKey, icon }) => (
           <button
             key={key}
             onClick={() => setMetric(key)}
@@ -117,7 +120,7 @@ export default function LeaderboardScreen() {
             }`}
             style={metric === key ? { backgroundColor: 'var(--color-primary)', borderColor: 'var(--color-primary)' } : {}}
           >
-            {emoji} {t(labelKey)}
+            {icon} {t(labelKey)}
           </button>
         ))}
       </div>
@@ -131,7 +134,7 @@ export default function LeaderboardScreen() {
           <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
             {t('your_rank')}
           </span>
-          <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+          <span className="text-sm font-bold flex items-center gap-1" style={{ color: 'var(--color-primary)' }}>
             {rankBadge(myEntry.rank)} — {myEntry.score} {UNIT_LABELS[metric]}
           </span>
         </div>
@@ -143,7 +146,7 @@ export default function LeaderboardScreen() {
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
         ) : data.length === 0 ? (
           <div className="card text-center py-10 flex flex-col items-center gap-2">
-            <span className="text-4xl">🏆</span>
+            <span className="text-amber-500"><Trophy size={48} strokeWidth={1.5} /></span>
             <p className="text-gray-500 text-sm">No data yet — be the first!</p>
           </div>
         ) : (
@@ -162,9 +165,9 @@ export default function LeaderboardScreen() {
                 {/* Rank */}
                 <div className="w-8 text-center flex-shrink-0">
                   {row.rank <= 3 ? (
-                    <span className="text-xl">{rankBadge(row.rank)}</span>
+                    <div className="flex justify-center">{rankBadge(row.rank)}</div>
                   ) : (
-                    <span className="text-sm font-bold text-gray-500">#{row.rank}</span>
+                    rankBadge(row.rank)
                   )}
                 </div>
 

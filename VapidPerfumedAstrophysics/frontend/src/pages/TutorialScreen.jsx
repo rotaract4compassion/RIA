@@ -1,38 +1,39 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ClipboardList, FileText, Lock, Trophy, MessageSquare } from 'lucide-react';
 import { t } from '../lib/i18n';
 
 const slides = [
   {
-    emoji: '📋',
+    icon: <ClipboardList className="text-primary" size={64} strokeWidth={1.5} />,
     titleKey: 'Find your project',
     titleSw: 'Tafuta mradi wako',
     bodyEn: 'Browse projects you\'ve been added to, or use "+" to search and join new ones.',
     bodySw: 'Angalia miradi uliyongezwa, au tumia "+" kutafuta na kujiunga na miradi mipya.',
   },
   {
-    emoji: '📝',
+    icon: <FileText className="text-primary" size={64} strokeWidth={1.5} />,
     titleKey: 'Fill it out, even offline',
     titleSw: 'Jaza, hata bila mtandao',
     bodyEn: 'You can fill and submit questionnaires even without internet. Your data syncs automatically when you reconnect.',
     bodySw: 'Unaweza kujaza na kuwasilisha dodoso hata bila mtandao. Data yako itasawazishwa otomatiki unapounganika tena.',
   },
   {
-    emoji: '🔒',
+    icon: <Lock className="text-primary" size={64} strokeWidth={1.5} />,
     titleKey: 'Your data, protected',
     titleSw: 'Data yako, inalindwa',
     bodyEn: 'After you submit, your answers stay private on your phone and disappear from view after 30 minutes — but don\'t worry, they still sync.',
     bodySw: 'Baada ya kuwasilisha, majibu yako yanabaki faragha kwenye simu yako na kutoweka baada ya dakika 30 — lakini usijali, bado yanasawazishwa.',
   },
   {
-    emoji: '🏆',
+    icon: <Trophy className="text-primary" size={64} strokeWidth={1.5} />,
     titleKey: 'Track your impact',
     titleSw: 'Fuatilia mchango wako',
     bodyEn: 'Earn achievements as you contribute data. See your impact in minutes, regions, and badges.',
     bodySw: 'Pata mafanikio unapotoa data. Ona mchango wako kwa dakika, mikoa, na beji.',
   },
   {
-    emoji: '💬',
+    icon: <MessageSquare className="text-primary" size={64} strokeWidth={1.5} />,
     titleKey: 'Got something to say?',
     titleSw: 'Una kitu cha kusema?',
     bodyEn: 'Use the Suggestions tab to share feedback with project admins — anonymously if you prefer.',
@@ -81,7 +82,7 @@ export default function TutorialScreen() {
 
       {/* Slide content */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 gap-6 animate-fade-in" key={current}>
-        <div className="text-7xl">{slide.emoji}</div>
+        <div className="flex justify-center text-primary">{slide.icon || slide.emoji}</div>
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-3">
             {lang === 'sw' ? slide.titleSw : slide.titleKey}

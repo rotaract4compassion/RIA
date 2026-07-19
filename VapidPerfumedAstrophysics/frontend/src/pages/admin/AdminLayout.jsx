@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../store/adminAuth';
 
+import { LayoutDashboard, ClipboardList, Users, Key, MessageSquare, Megaphone } from 'lucide-react';
+
 const navItems = [
-  { to: '/admin', label: 'Overview', icon: '📊', end: true },
-  { to: '/admin/projects', label: 'Projects', icon: '📋' },
-  { to: '/admin/users', label: 'Users', icon: '👥' },
-  { to: '/admin/admins', label: 'Admins', icon: '🔑' },
-  { to: '/admin/suggestions', label: 'Suggestions', icon: '💬' },
-  { to: '/admin/broadcasts', label: 'Broadcasts', icon: '📣' },
+  { to: '/admin', label: 'Overview', icon: <LayoutDashboard size={18} />, end: true },
+  { to: '/admin/projects', label: 'Projects', icon: <ClipboardList size={18} /> },
+  { to: '/admin/users', label: 'Users', icon: <Users size={18} /> },
+  { to: '/admin/admins', label: 'Admins', icon: <Key size={18} /> },
+  { to: '/admin/suggestions', label: 'Suggestions', icon: <MessageSquare size={18} /> },
+  { to: '/admin/broadcasts', label: 'Broadcasts', icon: <Megaphone size={18} /> },
 ];
 
 export default function AdminLayout() {

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 import { t } from '../lib/i18n';
 import LangToggle from '../components/LangToggle';
+import { Eye, EyeOff } from 'lucide-react';
 
 function PasswordStrength({ password }) {
   const score = [
@@ -30,6 +31,7 @@ export default function RegisterScreen() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [form, setForm] = useState({ name: '', club: '', email: '', phone: '', password: '', identity: 'unknown' });
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [, forceUpdate] = useState(0);
@@ -147,7 +149,23 @@ export default function RegisterScreen() {
 
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1.5">{t('password')}</label>
-            <input {...field('password')} type="password" placeholder="Min. 8 characters" autoComplete="new-password" />
+            <div className="relative">
+              <input 
+                {...field('password')} 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="Min. 8 characters" 
+                autoComplete="new-password" 
+                className={`${field('password').className} pr-10`}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             <PasswordStrength password={form.password} />
             {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
           </div>

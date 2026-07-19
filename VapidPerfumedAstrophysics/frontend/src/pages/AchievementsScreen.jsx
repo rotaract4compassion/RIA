@@ -4,6 +4,7 @@ import { t, getLang } from '../lib/i18n';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { BarChart2, Map, Trophy, ClipboardList, Star } from 'lucide-react';
 
 export default function AchievementsScreen() {
   const navigate = useNavigate();
@@ -48,12 +49,12 @@ export default function AchievementsScreen() {
                 <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('impact_summary')}</h2>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   {[
-                    { v: impact.total_submissions, l: t('submissions'), e: '📊' },
-                    { v: impact.region_count, l: t('regions'), e: '🗺️' },
-                    { v: unlocked.length, l: t('achievements'), e: '🏆' },
-                  ].map(({ v, l, e }) => (
-                    <div key={l}>
-                      <div className="text-2xl">{e}</div>
+                    { v: impact.total_submissions, l: t('submissions'), icon: <BarChart2 size={20} /> },
+                    { v: impact.region_count, l: t('regions'), icon: <Map size={20} /> },
+                    { v: unlocked.length, l: t('achievements'), icon: <Trophy size={20} /> },
+                  ].map(({ v, l, icon }) => (
+                    <div key={l} className="text-center flex flex-col items-center">
+                      <div className="text-gray-400 mb-1">{icon}</div>
                       <div className="text-xl font-bold text-gray-900">{v}</div>
                       <div className="text-xs text-gray-500">{l}</div>
                     </div>
@@ -79,7 +80,11 @@ export default function AchievementsScreen() {
                 <div className="grid grid-cols-2 gap-3">
                   {unlocked.map(a => (
                     <div key={a.id} className="card text-center flex flex-col items-center gap-2 py-4">
-                      <span className="text-3xl">{a.icon}</span>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-gray-700"
+                           style={{ backgroundColor: 'var(--color-primary-light)' }}>
+                        {a.type.includes('project') ? <ClipboardList size={20} /> :
+                         a.type.includes('region') ? <Map size={20} /> : <Star size={20} />}
+                      </div>
                       <p className="text-sm font-semibold text-gray-900">
                         {lang === 'sw' ? a.name_sw : a.name_en}
                       </p>

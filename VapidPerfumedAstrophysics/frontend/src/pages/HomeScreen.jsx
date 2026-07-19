@@ -5,6 +5,7 @@ import { t, getLang } from '../lib/i18n';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { BarChart2, Map, Trophy, FolderOpen, Smartphone } from 'lucide-react';
 
 function ProjectCard({ project, onClick }) {
   return (
@@ -42,12 +43,12 @@ function ImpactStrip({ impact }) {
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('impact_summary')}</h3>
       <div className="flex justify-around">
         {[
-          { value: impact.total_submissions, label: t('submissions'), emoji: '📊' },
-          { value: impact.region_count, label: t('regions'), emoji: '🗺️' },
-          { value: impact.achievement_count, label: t('achievements'), emoji: '🏆' },
-        ].map(({ value, label, emoji }) => (
-          <div key={label} className="text-center">
-            <div className="text-xl">{emoji}</div>
+          { value: impact.total_submissions, label: t('submissions'), icon: <BarChart2 size={24} /> },
+          { value: impact.region_count, label: t('regions'), icon: <Map size={24} /> },
+          { value: impact.achievement_count, label: t('achievements'), icon: <Trophy size={24} /> },
+        ].map(({ value, label, icon }) => (
+          <div key={label} className="text-center flex flex-col items-center">
+            <div className="text-gray-400 mb-1">{icon}</div>
             <div className="text-xl font-bold text-gray-900">{value}</div>
             <div className="text-xs text-gray-500">{label}</div>
           </div>
@@ -115,9 +116,9 @@ export default function HomeScreen() {
         {!isInstalled && (
           <button
             onClick={() => navigate('/add-to-home')}
-            className="mt-3 w-full text-xs text-center py-2 rounded-xl border border-dashed border-gray-300 text-gray-400"
+            className="mt-3 w-full text-xs flex items-center justify-center gap-2 py-2 rounded-xl border border-dashed border-gray-300 text-gray-400"
           >
-            📱 Add Ria to your home screen for offline access
+            <Smartphone size={16} /> Add Ria to your home screen for offline access
           </button>
         )}
       </div>
@@ -146,7 +147,7 @@ export default function HomeScreen() {
             </div>
           ) : projects.length === 0 ? (
             <div className="card text-center py-8 flex flex-col items-center gap-3">
-              <span className="text-4xl">📂</span>
+              <span className="text-gray-300"><FolderOpen size={48} strokeWidth={1.5} /></span>
               <p className="text-gray-500 text-sm">{t('no_projects')}</p>
               <p className="text-gray-400 text-xs">{t('join_project')}</p>
               <button
@@ -175,7 +176,7 @@ export default function HomeScreen() {
             className="card text-left flex items-center gap-3"
             onClick={() => navigate('/achievements')}
           >
-            <span className="text-3xl">🏆</span>
+            <span className="text-amber-500"><Trophy size={32} /></span>
             <div>
               <p className="font-semibold text-sm text-gray-900">
                 {impact.achievement_count} Achievement{impact.achievement_count !== 1 ? 's' : ''} unlocked

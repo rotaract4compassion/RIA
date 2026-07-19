@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { ClipboardList, Users, Key, MessageSquare, Megaphone, AlertTriangle, CheckCircle, BarChart2 } from 'lucide-react';
 
 function KpiCard({ value, label, icon }) {
   return (
@@ -11,7 +12,7 @@ function KpiCard({ value, label, icon }) {
           <p className="text-2xl font-bold text-gray-900">{value ?? '—'}</p>
           <p className="text-sm text-gray-500 mt-1">{label}</p>
         </div>
-        <span className="text-2xl">{icon}</span>
+        <span className="text-gray-400">{icon}</span>
       </div>
     </div>
   );
@@ -28,7 +29,9 @@ function SystemHealthWidget({ health }) {
           <p className="font-semibold text-gray-900">System Health</p>
           <p className="text-xs text-gray-500 mt-0.5">Database & hosting limits</p>
         </div>
-        <span className="text-xl">{isWarning ? '⚠️' : '✅'}</span>
+        <span className={isWarning ? 'text-amber-500' : 'text-green-500'}>
+          {isWarning ? <AlertTriangle size={24} /> : <CheckCircle size={24} />}
+        </span>
       </div>
 
       <div className="mb-3">
@@ -94,11 +97,11 @@ export default function AdminHome() {
   }, []);
 
   const quickLinks = [
-    { label: 'Projects', icon: '📋', to: '/admin/projects' },
-    { label: 'Users', icon: '👥', to: '/admin/users' },
-    { label: 'Admins', icon: '🔑', to: '/admin/admins' },
-    { label: 'Suggestions', icon: '💬', to: '/admin/suggestions' },
-    { label: 'Broadcasts', icon: '📣', to: '/admin/broadcasts' },
+    { label: 'Projects', icon: <ClipboardList size={24} />, to: '/admin/projects' },
+    { label: 'Users', icon: <Users size={24} />, to: '/admin/users' },
+    { label: 'Admins', icon: <Key size={24} />, to: '/admin/admins' },
+    { label: 'Suggestions', icon: <MessageSquare size={24} />, to: '/admin/suggestions' },
+    { label: 'Broadcasts', icon: <Megaphone size={24} />, to: '/admin/broadcasts' },
   ];
 
   return (
@@ -114,10 +117,10 @@ export default function AdminHome() {
         <div className="flex flex-col gap-6">
           {/* KPIs */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard value={stats?.activeProjects} label="Active Projects" icon="📋" />
-            <KpiCard value={stats?.totalSubmissions} label="Total Submissions" icon="📊" />
-            <KpiCard value={stats?.registeredUsers} label="Registered Users" icon="👥" />
-            <KpiCard value={stats?.pendingSuggestions} label="Unread Suggestions" icon="💬" />
+            <KpiCard value={stats?.activeProjects} label="Active Projects" icon={<ClipboardList size={24} />} />
+            <KpiCard value={stats?.totalSubmissions} label="Total Submissions" icon={<BarChart2 size={24} />} />
+            <KpiCard value={stats?.registeredUsers} label="Registered Users" icon={<Users size={24} />} />
+            <KpiCard value={stats?.pendingSuggestions} label="Unread Suggestions" icon={<MessageSquare size={24} />} />
           </div>
 
           {/* System health */}
@@ -133,7 +136,7 @@ export default function AdminHome() {
                   onClick={() => navigate(to)}
                   className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-[var(--color-primary)] transition-colors text-left flex items-center gap-3"
                 >
-                  <span className="text-2xl">{icon}</span>
+                  <span className="text-gray-400">{icon}</span>
                   <span className="text-sm font-medium text-gray-700">{label}</span>
                 </button>
               ))}
