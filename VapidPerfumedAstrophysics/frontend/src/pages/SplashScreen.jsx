@@ -52,7 +52,7 @@ export default function SplashScreen() {
         {/* Rotary lockup */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 splash-b">
           <img
-            src="/partners/rotary-international-icon.png"
+            src="/partners/rotary-international-icon.jpg"
             alt="Rotary wheel"
             className="w-28 h-28 drop-shadow-sm object-contain"
           />
