@@ -245,16 +245,16 @@ export default function AdminProjectDetail() {
         <div className="flex flex-col gap-6">
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <h2 className="font-semibold text-gray-900 mb-4">Submission volume (last 30 days)</h2>
-            <VolumeChart data={analytics.volume_over_time} />
+            <VolumeChart data={analytics.volume} />
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><MapPin size={20} className="text-gray-500" /> Region activity heatmap</h2>
-            <RegionHeatmap data={analytics.by_region} />
+            <RegionHeatmap data={analytics.regions} />
           </div>
-          {analytics.by_version.length > 1 && (
+          {analytics.versions && analytics.versions.length > 1 && (
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <h2 className="font-semibold text-gray-900 mb-4">By questionnaire version</h2>
-              {analytics.by_version.map(v => (
+              {analytics.versions.map(v => (
                 <div key={v.version_number} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
                   <span className="text-sm text-gray-600">Version {v.version_number}</span>
                   <span className="text-sm font-medium text-gray-900">{v.count} submissions</span>
