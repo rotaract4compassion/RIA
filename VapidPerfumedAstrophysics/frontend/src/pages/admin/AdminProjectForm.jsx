@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../lib/api';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle, ChevronUp, ChevronDown, Plus } from 'lucide-react';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const FIELD_TYPES = ['text', 'number', 'select', 'boolean'];
@@ -143,68 +143,50 @@ function QuestionBuilder({ questions, onChange }) {
   return (
     <div className="flex flex-col gap-4">
       {questions.map((q, i) => (
-        <div key={q.id} className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-500">Question {i + 1}</span>
-            <div className="flex items-center gap-1">
-              <button onClick={() => moveQuestion(i, -1)} disabled={i === 0} className="p-1 text-gray-400 disabled:opacity-30">▲</button>
-              <button onClick={() => moveQuestion(i, 1)} disabled={i === questions.length - 1} className="p-1 text-gray-400 disabled:opacity-30">▼</button>
-              <button onClick={() => removeQuestion(i)} className="p-1 text-red-400"><X size={16} /></button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1">Label (EN)</label>
-              <input
-                type="text"
-                value={q.label}
-                onChange={e => updateQuestion(i, { label: e.target.value })}
-                placeholder="Question text in English"
-                className="input-field text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1">Label (SW)</label>
-              <input
-                type="text"
-                value={q.label_sw || ''}
-                onChange={e => updateQuestion(i, { label_sw: e.target.value })}
-                placeholder="Maandishi ya swali kwa Kiswahili"
-                className="input-field text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1">Type</label>
+        <div key={q.id} className="bg-white rounded-xl p-5 flex flex-col gap-4 shadow-sm border border-gray-100 relative group transition-all hover:shadow-md">
+          {/* Header Row */}
+          <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded">Q{i + 1}</span>
               <select
                 value={q.type}
                 onChange={e => updateQuestion(i, { type: e.target.value })}
-                className="input-field text-sm"
+                className="text-sm font-semibold bg-transparent border-none text-gray-900 focus:ring-0 p-0 cursor-pointer"
               >
-                {FIELD_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {FIELD_TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
               </select>
             </div>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={q.required}
-                  onChange={e => updateQuestion(i, { required: e.target.checked })}
-                  className="accent-[var(--color-primary)]"
-                />
-                <span className="text-xs font-medium text-gray-600">Required</span>
-              </label>
+            <div className="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => moveQuestion(i, -1)} disabled={i === 0} className="p-1.5 hover:bg-gray-100 rounded text-gray-500 disabled:opacity-30"><ChevronUp size={16} /></button>
+              <button onClick={() => moveQuestion(i, 1)} disabled={i === questions.length - 1} className="p-1.5 hover:bg-gray-100 rounded text-gray-500 disabled:opacity-30"><ChevronDown size={16} /></button>
+              <button onClick={() => removeQuestion(i)} className="p-1.5 hover:bg-red-50 rounded text-red-500"><X size={16} /></button>
             </div>
           </div>
 
+          {/* Text Inputs */}
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              value={q.label}
+              onChange={e => updateQuestion(i, { label: e.target.value })}
+              placeholder="Question text in English..."
+              className="w-full text-base font-medium text-gray-900 bg-transparent border-0 border-b border-transparent hover:border-gray-200 focus:border-[var(--color-primary)] focus:ring-0 px-0 py-1 transition-colors placeholder-gray-300"
+            />
+            <input
+              type="text"
+              value={q.label_sw || ''}
+              onChange={e => updateQuestion(i, { label_sw: e.target.value })}
+              placeholder="Maandishi ya swali kwa Kiswahili..."
+              className="w-full text-sm italic text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-200 focus:border-[var(--color-primary)] focus:ring-0 px-0 py-1 transition-colors placeholder-gray-300"
+            />
+          </div>
+
+          {/* Options (if select) */}
           {q.type === 'select' && (
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1">Options (one per line: value|label)</label>
+            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-2">Options (value | label)</label>
               <textarea
-                rows={3}
+                rows={2}
                 value={(q.options || []).map(o => `${o.value}|${o.label}`).join('\n')}
                 onChange={e => {
                   const opts = e.target.value.split('\n').filter(Boolean).map(line => {
@@ -213,57 +195,43 @@ function QuestionBuilder({ questions, onChange }) {
                   });
                   updateQuestion(i, { options: opts });
                 }}
-                placeholder="yes|Yes&#10;no|No"
-                className="input-field resize-none text-sm font-mono"
+                placeholder="yes | Yes&#10;no | No"
+                className="w-full text-sm font-mono bg-transparent border-0 focus:ring-0 p-0 resize-none text-gray-700 placeholder-gray-300"
               />
             </div>
           )}
 
-          {/* Skip logic */}
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Conditional logic (optional)</label>
-            <div className="grid grid-cols-3 gap-2">
-              <select
-                value={q.condition?.question_id || ''}
-                onChange={e => updateQuestion(i, { condition: e.target.value ? { ...q.condition, question_id: e.target.value } : null })}
-                className="input-field text-xs"
-              >
-                <option value="">Always show</option>
-                {questions.slice(0, i).map(prev => (
-                  <option key={prev.id} value={prev.id}>{prev.label || prev.id}</option>
-                ))}
-              </select>
-              {q.condition && (
-                <>
-                  <select
-                    value={q.condition?.operator || 'eq'}
-                    onChange={e => updateQuestion(i, { condition: { ...q.condition, operator: e.target.value } })}
-                    className="input-field text-xs"
-                  >
-                    <option value="eq">equals</option>
-                    <option value="neq">not equals</option>
-                    <option value="gt">greater than</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={q.condition?.value || ''}
-                    onChange={e => updateQuestion(i, { condition: { ...q.condition, value: e.target.value } })}
-                    placeholder="value"
-                    className="input-field text-xs"
-                  />
-                </>
-              )}
-            </div>
+          {/* Footer Controls */}
+          <div className="flex items-center justify-between pt-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={q.required}
+                onChange={e => updateQuestion(i, { required: e.target.checked })}
+                className="accent-[var(--color-primary)] w-4 h-4 rounded"
+              />
+              <span className="text-xs font-medium text-gray-600">Required</span>
+            </label>
+
+            {/* Skip logic simplified */}
+            <select
+              value={q.condition?.question_id || ''}
+              onChange={e => updateQuestion(i, { condition: e.target.value ? { ...q.condition, question_id: e.target.value, operator: 'eq', value: 'yes' } : null })}
+              className="text-xs text-gray-500 bg-transparent border-none focus:ring-0 cursor-pointer"
+            >
+              <option value="">Always show</option>
+              {questions.slice(0, i).map(prev => (
+                <option key={prev.id} value={prev.id}>Show if {prev.label || prev.id} ...</option>
+              ))}
+            </select>
           </div>
         </div>
       ))}
-
       <button
-        type="button"
         onClick={addQuestion}
-        className="flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 text-sm font-medium hover:border-[var(--color-primary)] transition-colors"
+        className="w-full py-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 font-medium text-sm hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors flex items-center justify-center gap-2"
       >
-        + Add Question
+        <Plus size={20} /> Add Question
       </button>
     </div>
   );

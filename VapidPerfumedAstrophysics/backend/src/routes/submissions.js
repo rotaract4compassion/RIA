@@ -129,16 +129,43 @@ router.get('/admin/analytics/global', requireAdmin, async (req, res) => {
          WHERE s.location_lat IS NOT NULL AND s.location_lng IS NOT NULL`
       )
     ]);
-    res.json({
-      trends: trendRes.rows,
-      regions: regionRes.rows,
-      projects: projectRes.rows,
-      totals: totalsRes.rows[0],
-      heatmap: heatmapRes.rows
-    });
+      res.json({
+        trend: trendRes.rows,
+        regions: regionRes.rows,
+        projects: projectRes.rows,
+        totals: totalsRes.rows[0],
+        heatmaps: heatmapRes.rows
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Analytics failed' });
+    }
+});
+
+// DELETE /api/submissions/admin/purge — Global data purging
+router.delete('/admin/purge', requireAdmin, async (req, res) => {
+  if (req.adminScope !== 'global') {
+    return res.status(403).json({ error: 'Global admins only' });
+  }
+  const days = parseInt(req.query.days);
+  if (!days || isNaN(days)) {
+    return res.status(400).json({ error: 'Valid days parameter required' });
+  }
+  try {
+    const result = await db.query(
+      `DELETE FROM submissions WHERE submitted_at < NOW() - $1::interval RETURNING id`,
+      [`${days} days`]
+    );
+    // Audit log
+    await db.query(
+      `INSERT INTO admin_audit_log (actor_admin_id, action, target_type, metadata)
+       VALUES ($1, $2, $3, $4)`,
+      [req.adminId, 'purge_data', 'submissions', JSON.stringify({ days, count: result.rowCount })]
+    );
+    res.json({ message: `Purged ${result.rowCount} submissions older than ${days} days`, count: result.rowCount });
   } catch (err) {
-    console.error('Global analytics error:', err);
-    res.status(500).json({ error: 'Failed to load global analytics' });
+    console.error(err);
+    res.status(500).json({ error: 'Purge failed' });
   }
 });
 

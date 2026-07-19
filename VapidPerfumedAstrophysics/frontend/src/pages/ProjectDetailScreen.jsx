@@ -131,7 +131,7 @@ export default function ProjectDetailScreen() {
 
       {/* CTA */}
       {project.current_questionnaire && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 safe-bottom z-30">
+        <div className="fixed bottom-[56px] left-0 right-0 p-4 bg-white border-t border-gray-100 safe-bottom z-30">
           <button
             className="btn-primary"
             onClick={handleStartSubmission}

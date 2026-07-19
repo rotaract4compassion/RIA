@@ -5,7 +5,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-import { TrendingUp, Users, Clock, AlertTriangle, MapPin } from 'lucide-react';
+import { TrendingUp, Users, Clock, AlertTriangle, MapPin, Database } from 'lucide-react';
 
 const COLORS = ['#E91E8C', '#17458F', '#F7A81B', '#4CAF50', '#9C27B0', '#FF5722'];
 
@@ -158,6 +158,52 @@ export default function AdminAnalytics() {
                 <Bar dataKey="count" fill="var(--color-gold)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Data Management (Global Admin Only) */}
+      <div className="card mt-6 border-red-100 bg-red-50/30">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-red-100 text-red-600 rounded-xl">
+            <Database size={24} />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-gray-900 mb-1">Data Quota Management</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              To save on database storage costs, global admins can permanently delete old submission data. 
+              <strong> This action cannot be undone.</strong>
+            </p>
+            <div className="flex items-center gap-3 max-w-md">
+              <select 
+                className="input-field py-2 text-sm bg-white"
+                defaultValue=""
+                onChange={(e) => {
+                  if (!e.target.value) return;
+                  if (window.confirm(`Are you absolutely sure you want to permanently delete all submissions older than ${e.target.value} days?`)) {
+                    api.delete(`/api/submissions/admin/purge?days=${e.target.value}`)
+                      .then(res => {
+                        alert(res.message || `Successfully purged ${res.count || 0} submissions.`);
+                        e.target.value = '';
+                        loadAnalytics(); // refresh stats
+                      })
+                      .catch(err => {
+                        alert(err.message || 'Failed to purge data.');
+                        e.target.value = '';
+                      });
+                  } else {
+                    e.target.value = '';
+                  }
+                }}
+              >
+                <option value="" disabled>Select timeframe to purge...</option>
+                <option value="365">Older than 1 Year (365 days)</option>
+                <option value="120">Older than 120 days</option>
+                <option value="90">Older than 90 days</option>
+                <option value="60">Older than 60 days</option>
+                <option value="30">Older than 30 days</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
