@@ -4,3 +4,12 @@ node_modules/
 *.log
 dist/
 .DS_Store
+
+# Replit artifacts (never commit these)
+.replit
+replit.md
+.local/
+attached_assets/
+
+# Portable Node bundle (local tool, not project code)
+node-v26.5.0-win-x64/

@@ -26,24 +26,53 @@ export default function SplashScreen() {
       } else {
         navigate('/welcome');
       }
-    }, 1400);
+    }, 2800);
     return () => clearTimeout(timer);
   }, [loading, user, navigate]);
 
   return (
     <div className="h-full flex flex-col items-center justify-center bg-white relative overflow-hidden">
       {/* Dual-identity crossfade — sub-1.5s branding beat */}
-      <div className="relative w-64 h-64 flex items-center justify-center">
-        <img
-          src="/splash/ria-rotaract-splash-lockup.png"
-          alt="Rotaract in Action"
-          className="absolute inset-0 w-full h-full object-contain splash-a"
-        />
-        <img
-          src="/splash/ria-rotary-splash-lockup.png"
-          alt="Rotary in Action"
-          className="absolute inset-0 w-full h-full object-contain splash-b"
-        />
+      <div className="relative w-72 h-72 flex items-center justify-center">
+        {/* Rotaract lockup */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 splash-a">
+          <img
+            src="/partners/rotaract-muhimbili-icon.svg"
+            alt="Rotaract wheel"
+            className="w-28 h-28 drop-shadow-sm"
+          />
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#E91E8C' }}>
+              Rotaract in Action
+            </h1>
+            <p className="text-xs text-gray-400 mt-1 font-medium tracking-widest uppercase">Ria</p>
+          </div>
+        </div>
+        {/* Rotary lockup */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 splash-b">
+          <img
+            src="/partners/rotary-international-icon.svg"
+            alt="Rotary wheel"
+            className="w-28 h-28 drop-shadow-sm"
+          />
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#17458F' }}>
+              Rotary in Action
+            </h1>
+            <p className="text-xs text-gray-400 mt-1 font-medium tracking-widest uppercase">Ria</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Partner strip */}
+      <div className="absolute bottom-8 flex flex-col items-center gap-2 opacity-50">
+        <p className="text-[10px] text-gray-400 tracking-wider uppercase">In partnership with</p>
+        <div className="flex items-center gap-4">
+          <img src="/partners/rotary-international-icon.svg" alt="Rotary International" className="w-6 h-6 object-contain" />
+          <img src="/partners/rotaract-tanzania-icon.svg" alt="Rotaract Tanzania" className="w-6 h-6 object-contain" />
+          <img src="/partners/rotaract-muhimbili-icon.svg" alt="Rotaract Muhimbili" className="w-6 h-6 object-contain" />
+          <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="w-6 h-6 object-contain" />
+        </div>
       </div>
     </div>
   );

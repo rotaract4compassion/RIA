@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Trust proxy (required for rate-limit in proxied environments like Replit/Render)
+// Trust proxy (required for rate-limit behind reverse proxies like Render)
 app.set('trust proxy', 1);
 
 // Middleware
