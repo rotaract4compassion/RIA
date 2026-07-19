@@ -40,7 +40,7 @@ export default function SplashScreen() {
           <img
             src="/partners/rotaract-muhimbili-icon.png"
             alt="Rotaract wheel"
-            className="w-28 h-28 drop-shadow-sm"
+            className="w-28 h-28 drop-shadow-sm object-contain"
           />
           <div className="text-center">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#E91E8C' }}>
@@ -54,7 +54,7 @@ export default function SplashScreen() {
           <img
             src="/partners/rotary-international-icon.png"
             alt="Rotary wheel"
-            className="w-28 h-28 drop-shadow-sm"
+            className="w-28 h-28 drop-shadow-sm object-contain"
           />
           <div className="text-center">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#17458F' }}>
