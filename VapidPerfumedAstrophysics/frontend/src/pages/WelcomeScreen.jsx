@@ -87,9 +87,13 @@ export default function WelcomeScreen() {
 
         {/* Admin Link & Partner Logos */}
         <div className="mt-8 flex flex-col items-center gap-6 animate-fade-in-up animation-delay-400">
-          <div className="flex flex-col items-center gap-2 opacity-60">
-            <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Built by</span>
-            <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="h-5 grayscale contrast-200 brightness-200" />
+          <div className="flex flex-col items-center gap-3 opacity-60">
+            <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Partners under R4C</span>
+            <div className="flex items-center gap-5 grayscale contrast-200 brightness-200">
+              <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="h-5" />
+              <img src="/partners/rotaract-tanzania-icon.svg" alt="Rotaract Tanzania" className="h-5" />
+              <img src="/partners/rotaract-muhimbili-icon.svg" alt="Rotaract Muhimbili" className="h-5" />
+            </div>
           </div>
           <button onClick={() => navigate('/admin/login')} className="text-xs font-semibold text-gray-400 hover:text-white transition-colors">
             Admin? Sign in here &rarr;
