@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #E91E8C;
+  --color-primary-dark: #C2176E;
+  --color-primary-light: #FCE4F3;
+  --color-on-primary: #ffffff;
+  --color-gold: #F7A81B;
+}
+
+[data-theme="rotary"] {
+  --color-primary: #17458F;
+  --color-primary-dark: #0F2D5E;
+  --color-primary-light: #E8EDF7;
+  --color-on-primary: #ffffff;
+}
+
+[data-theme="rotaract"] {
+  --color-primary: #E91E8C;
+  --color-primary-dark: #C2176E;
+  --color-primary-light: #FCE4F3;
+  --color-on-primary: #ffffff;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Scrollable areas */
+.scroll-area {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Theme-driven utility classes */
+.btn-primary {
+  @apply flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-2xl font-semibold text-white transition-all active:scale-95;
+  background-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  @apply flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-2xl font-semibold transition-all active:scale-95 border-2;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: transparent;
+}
+
+.btn-ghost {
+  @apply flex items-center justify-center gap-2 py-2 px-4 rounded-xl font-medium transition-all active:scale-95 text-gray-600;
+}
+
+.card {
+  @apply bg-white rounded-2xl p-4 shadow-sm border border-gray-100;
+}
+
+.input-field {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 
+    placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all text-base;
+}
+
+.input-field:focus {
+  --tw-ring-color: var(--color-primary);
+}
+
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-40;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-1 rounded-full transition-all duration-300;
+  background-color: var(--color-primary);
+}
+
+/* Offline banner */
+.offline-banner {
+  @apply fixed top-0 left-0 right-0 z-50 text-center text-xs py-1.5 font-medium text-white;
+  background-color: #6B7280;
+}
+
+/* Spinner */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  animation: spin 1.5s linear infinite;
+}
+
+/* Crossfade for splash */
+@keyframes crossfadeA {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes crossfadeB {
+  0%, 45% { opacity: 0; }
+  50%, 95% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.splash-a { animation: crossfadeA 3s ease-in-out infinite; }
+.splash-b { animation: crossfadeB 3s ease-in-out infinite; }
+
+/* Swipeable tutorial */
+.swipe-container {
+  display: flex;
+  transition: transform 0.3s ease-out;
+}

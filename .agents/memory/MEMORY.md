@@ -1,0 +1,3 @@
+- [Ria project structure](ria-project.md) — Fullstack PWA under VapidPerfumedAstrophysics/; frontend port 5000, backend port 3001, PostgreSQL.
+- [Ria spinner decision](ria-spinner.md) — rotaract-tanzania-icon.svg was a binary PNG; use programmatic 8-tooth gear SVG in LoadingSpinner.jsx.
+- [Ria addendum v2 scope](ria-addendum.md) — All 8 addendum features implemented: briefing, post-submit dual-action, leaderboard, broadcasts, profile/settings, Supabase Storage hooks, seed-admin script, extended audit logs.

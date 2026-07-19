@@ -1,0 +1,76 @@
+# Ria — Addendum Prompt (v2 additions)
+
+This is a follow-up to the existing Ria build already in progress. Paste this in as an addition — it does NOT replace `ria-build-prompt.md` or `ria-user-journeys.md`, it extends them. Scope is intentionally limited to the items below only.
+
+---
+
+## 1. Project briefing screen (Field User App)
+
+New step between "Project detail" and "Start Questionnaire":
+
+- Admin-authored per-project content: instructions, background/context (the why), and simple visuals — low-res or vector (SVG preferred) illustrations/diagrams only, kept lightweight
+- Admin writes this via a simple rich-text/markdown editor on the project edit screen (extends the existing project creation/edit flow)
+- Shown by default the **first time** a user opens a given project; after that it becomes a "View project info" link rather than a forced gate
+- **"Continue" button** proceeds into the existing questionnaire flow
+
+## 2. Post-submission flow update (Field User App)
+
+On the existing submit confirmation screen, add two explicit actions instead of a single auto-return:
+- **"Submit Another"** — loops back into a fresh questionnaire instance for the same project
+- **"Back to Home"** — returns to the home dashboard
+
+## 3. Leaderboard (Field User App, gamification)
+
+- Two views: **by club** and **by individual user**
+- Toggleable ranking metric: total impact minutes, submission count, or regions covered
+- Available both **globally** (app-wide) and **per-project** (scoped to a single project's contributors)
+- **Visibility toggle in Profile/Settings** (see §5): users can opt out of appearing on leaderboards by name; default is opted-in
+- Computed from existing submission/impact data already being tracked — no new data collection required, just aggregation/sorting queries
+
+## 4. Admin broadcast messaging
+
+**Delivery:** pull-based, piggybacking on the existing offline-sync check-in (not Web Push) — when the app checks in on open or reconnect, it also fetches new broadcasts alongside pushing queued submissions.
+
+**Targeting:** admin selects audience per broadcast — all users, a specific project's affiliated users, or a specific club. Project-scoped admins can only broadcast to their own project; global admins can broadcast wider.
+
+**Content:** title + body text, PLUS lightweight image support this time (unlike the suggestion box, which stays text-only) — compressed/optimized images only, reasonable size cap enforced client-side before upload, no video. This introduces a real image-storage requirement, which the rest of the app deliberately avoided for cost reasons — use Supabase Storage's free tier bucket for this, and document its limit in `DEPLOYMENT.md` alongside the other free-tier caps already tracked there.
+
+**Extras:**
+- Optional priority/pinned flag for urgent broadcasts (surfaces above routine ones)
+- Auto-expiry option, same pattern as the suggestion box, so old broadcasts don't accumulate
+
+**UI:**
+- Field user side: "Announcements" entry point (bottom nav or folded into Help), unread badge count
+- Admin side: "New Broadcast" screen — audience picker, title, body, optional image, optional priority toggle, send. Reachable from a project's admin detail view and as its own top-level admin section for global broadcasts.
+
+## 5. Proper Profile & Settings section (Field User App)
+
+Expand the existing Profile screen into a full settings surface:
+
+- **Profile picture:** upload/change, stored via the same image-storage path as broadcasts (Supabase Storage free tier) — compressed on upload, reasonable size cap
+- Editable info: name, club, email, phone number
+- **Language toggle (EN/SW):** must be selectable starting at onboarding (first Welcome/Landing screen, not introduced later) and remain changeable here afterward
+- Leaderboard visibility toggle (§3)
+- Logout
+- Installed-state indicator, app version, last sync time (already specified, unchanged)
+
+## 6. Cost/architecture note
+
+Profile pictures and broadcast images are the first place this app needs real file storage, which the original design deliberately avoided. Keep both capped and compressed client-side before upload (e.g. resize to a max dimension, convert to WebP/JPEG at moderate quality) so the free-tier storage bucket lasts as long as possible before this needs a paid tier.
+
+## 7. Bootstrap admin seed script
+
+One-time idempotent script (`scripts/seed-admin.js`) that creates the first admin from env vars, using the app's real bcrypt hashing logic — not a manual DB insert, which risks a password-hash mismatch. Script checks if any admin already exists first; if one does, it does nothing (safe to re-run). Document the bootstrap step in `DEPLOYMENT.md` so a fresh deploy has a repeatable way back in.
+
+**First admin seed values (set as env vars, not hardcoded in the script):**
+- Club/org: Rotaract Muhimbili
+- Name: Emmanuel Chesco
+- Phone number: 0778495969
+- Email: echesco05@gmail.com
+- Title: President
+- Password: set via `BOOTSTRAP_ADMIN_PASSWORD` at deploy time (do not commit a real password to the repo — leave a placeholder in `.env.example`)
+- Admin scope: global (this is the founding admin, not project-scoped)
+
+## 8. Auditable admin action logs
+
+Extend the existing "who created which admin" trail into a broader activity log: project edits, questionnaire changes, user access revocations, and broadcast sends, each recorded with actor + timestamp. Keep it a simple chronological list (like the existing admin-creation audit trail), not a full permissions/diff system. Retention: keep indefinitely for now unless DB size becomes a concern, in which case apply the same free-tier-awareness pattern already used elsewhere (surface it via the system health widget rather than silently truncating).
