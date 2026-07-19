@@ -71,10 +71,11 @@ export default function WelcomeScreen() {
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
         style={{ 
           backgroundImage: 'url(/images/hero-bg.png)',
-          opacity: bgLoaded ? 0.6 : 0
+          opacity: bgLoaded ? 1 : 0
         }}
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/85" />
+      {/* Lightened gradient so the background image pops through clearly */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-gray-900/60 via-gray-900/40 to-gray-900/80" />
 
       {/* Navigation Bar */}
       <div className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-gradient-to-b from-gray-900/80 to-transparent">
