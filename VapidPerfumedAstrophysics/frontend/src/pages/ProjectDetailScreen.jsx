@@ -77,7 +77,7 @@ export default function ProjectDetailScreen() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 scroll-area px-4 py-4 pb-36 flex flex-col gap-4">
+      <div className="flex-1 scroll-area px-4 py-4 pb-24 flex flex-col gap-4">
         {/* Description */}
         {project.description && (
           <div className="card">
@@ -127,19 +127,19 @@ export default function ProjectDetailScreen() {
             No questionnaire configured for this project yet.
           </div>
         ) : null}
-      </div>
 
-      {/* CTA */}
-      {project.current_questionnaire && (
-        <div className="fixed bottom-[56px] left-0 right-0 p-4 bg-white border-t border-gray-100 safe-bottom z-30">
-          <button
-            className="btn-primary"
-            onClick={handleStartSubmission}
-          >
-            {t('start_submission')}
-          </button>
-        </div>
-      )}
+        {/* CTA — inside scroll area, always visible */}
+        {project.current_questionnaire && (
+          <div className="mt-4">
+            <button
+              className="btn-primary text-lg py-4 shadow-lg"
+              onClick={handleStartSubmission}
+            >
+              {t('start_submission')}
+            </button>
+          </div>
+        )}
+      </div>
 
       <BottomNav />
     </div>

@@ -225,7 +225,7 @@ function QuestionBuilder({ questions, onChange }) {
           )}
 
           {/* Footer Controls */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-4 pt-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -235,19 +235,60 @@ function QuestionBuilder({ questions, onChange }) {
               />
               <span className="text-xs font-medium text-gray-600">Required</span>
             </label>
-
-            {/* Skip logic simplified */}
-            <select
-              value={q.condition?.question_id || ''}
-              onChange={e => updateQuestion(i, { condition: e.target.value ? { ...q.condition, question_id: e.target.value, operator: 'eq', value: 'yes' } : null })}
-              className="text-xs text-gray-500 bg-transparent border-none focus:ring-0 cursor-pointer"
-            >
-              <option value="">Always show</option>
-              {questions.slice(0, i).map(prev => (
-                <option key={prev.id} value={prev.id}>Show if {prev.label || prev.id} ...</option>
-              ))}
-            </select>
           </div>
+
+          {/* Conditional Logic — clean expandable */}
+          {i > 0 && (
+            <div className="border-t border-gray-100 pt-3 mt-1">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={!!q.condition}
+                  onChange={e => {
+                    if (e.target.checked) {
+                      updateQuestion(i, { condition: { question_id: questions[0].id, operator: 'eq', value: '' } });
+                    } else {
+                      updateQuestion(i, { condition: null });
+                    }
+                  }}
+                  className="accent-[var(--color-primary)] w-3.5 h-3.5 rounded"
+                />
+                <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Conditional (show only if...)</span>
+              </div>
+              {q.condition && (
+                <div className="flex flex-wrap items-center gap-2 text-sm bg-gray-50 p-2.5 rounded-lg">
+                  <span className="text-xs text-gray-500 font-medium">If</span>
+                  <select
+                    value={q.condition.question_id || ''}
+                    onChange={e => updateQuestion(i, { condition: { ...q.condition, question_id: e.target.value } })}
+                    className="text-xs bg-white border border-gray-200 rounded-md px-2 py-1 focus:border-[var(--color-primary)] focus:ring-0 max-w-[140px]"
+                  >
+                    {questions.slice(0, i).map(prev => (
+                      <option key={prev.id} value={prev.id}>Q{questions.indexOf(prev) + 1}: {prev.label?.slice(0, 25) || prev.id}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={q.condition.operator || 'eq'}
+                    onChange={e => updateQuestion(i, { condition: { ...q.condition, operator: e.target.value } })}
+                    className="text-xs bg-white border border-gray-200 rounded-md px-2 py-1 focus:border-[var(--color-primary)] focus:ring-0"
+                  >
+                    <option value="eq">equals</option>
+                    <option value="neq">does not equal</option>
+                    <option value="gt">greater than</option>
+                    <option value="lt">less than</option>
+                    <option value="contains">contains</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={q.condition.value || ''}
+                    onChange={e => updateQuestion(i, { condition: { ...q.condition, value: e.target.value } })}
+                    placeholder="value..."
+                    className="text-xs bg-white border border-gray-200 rounded-md px-2 py-1 focus:border-[var(--color-primary)] focus:ring-0 w-24"
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ))}
       <button

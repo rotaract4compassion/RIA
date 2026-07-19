@@ -129,17 +129,17 @@ router.get('/admin/analytics/global', requireAdmin, async (req, res) => {
          WHERE s.location_lat IS NOT NULL AND s.location_lng IS NOT NULL`
       )
     ]);
-      res.json({
-        trends: trendRes.rows,
-        regions: regionRes.rows,
-        projects: projectRes.rows,
-        totals: totalsRes.rows[0],
-        heatmap: heatmapRes.rows
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Analytics failed' });
-    }
+    res.json({
+      trends: trendRes.rows,
+      regions: regionRes.rows,
+      projects: projectRes.rows,
+      totals: totalsRes.rows[0] || { total_submissions: 0, total_users: 0, total_minutes: 0, flagged_submissions: 0 },
+      heatmap: heatmapRes.rows
+    });
+  } catch (err) {
+    console.error('Global analytics error:', err);
+    res.status(500).json({ error: 'Failed to load global analytics' });
+  }
 });
 
 // DELETE /api/submissions/admin/purge — Global data purging
