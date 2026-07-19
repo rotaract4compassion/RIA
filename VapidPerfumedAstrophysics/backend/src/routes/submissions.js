@@ -90,86 +90,8 @@ router.post('/batch', requireUser, async (req, res) => {
   res.json({ results });
 });
 
-// GET /api/submissions/admin/:projectId — admin: get all submissions for a project
-router.get('/admin/:projectId', requireAdmin, async (req, res) => {
-  const { projectId } = req.params;
-  const { start_date, end_date, region, version_id } = req.query;
-  let query = `
-    SELECT s.*, u.name as user_name, u.club as user_club, qv.version_number
-    FROM submissions s
-    JOIN users u ON u.id = s.user_id
-    JOIN questionnaire_versions qv ON qv.id = s.questionnaire_version_id
-    WHERE s.project_id = $1`;
-  const params = [projectId];
-  if (start_date) { params.push(start_date); query += ` AND s.submitted_at >= $${params.length}`; }
-  if (end_date) { params.push(end_date); query += ` AND s.submitted_at <= $${params.length}`; }
-  if (region) { params.push(region); query += ` AND s.region = $${params.length}`; }
-  if (version_id) { params.push(version_id); query += ` AND s.questionnaire_version_id = $${params.length}`; }
-  query += ' ORDER BY s.submitted_at DESC';
-  const result = await db.query(query, params);
-  res.json(result.rows);
-});
-
-// GET /api/submissions/admin/:projectId/analytics — quick analytics
-router.get('/admin/:projectId/analytics', requireAdmin, async (req, res) => {
-  const { projectId } = req.params;
-  const [volumeRes, regionRes, versionRes, minutesRes] = await Promise.all([
-    db.query(
-      `SELECT DATE(submitted_at) as date, COUNT(*) as count
-       FROM submissions WHERE project_id = $1
-       GROUP BY DATE(submitted_at) ORDER BY date`,
-      [projectId]
-    ),
-    db.query(
-      `SELECT region, COUNT(*) as count FROM submissions
-       WHERE project_id = $1 AND region IS NOT NULL
-       GROUP BY region ORDER BY count DESC`,
-      [projectId]
-    ),
-    db.query(
-      `SELECT qv.version_number, COUNT(*) as count
-       FROM submissions s JOIN questionnaire_versions qv ON qv.id = s.questionnaire_version_id
-       WHERE s.project_id = $1 GROUP BY qv.version_number ORDER BY qv.version_number`,
-      [projectId]
-    ),
-  try {
-    const [volumeRes, regionRes, versionRes, minutesRes] = await Promise.all([
-      db.query(
-        `SELECT DATE(submitted_at) as date, COUNT(*) as count
-         FROM submissions WHERE project_id = $1
-         GROUP BY DATE(submitted_at) ORDER BY date`,
-        [projectId]
-      ),
-      db.query(
-        `SELECT region, COUNT(*) as count FROM submissions
-         WHERE project_id = $1 AND region IS NOT NULL
-         GROUP BY region ORDER BY count DESC`,
-        [projectId]
-      ),
-      db.query(
-        `SELECT qv.version_number, COUNT(*) as count
-         FROM submissions s JOIN questionnaire_versions qv ON qv.id = s.questionnaire_version_id
-         WHERE s.project_id = $1 GROUP BY qv.version_number ORDER BY qv.version_number`,
-        [projectId]
-      ),
-      db.query(
-        `SELECT COALESCE(SUM((answers->>'minutes_of_impact')::numeric), 0) as total_minutes
-         FROM submissions WHERE project_id = $1`,
-        [projectId]
-      ),
-    ]);
-    res.json({
-      volume: volumeRes.rows,
-      regions: regionRes.rows,
-      versions: versionRes.rows,
-      total_minutes: minutesRes.rows[0].total_minutes,
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Analytics failed' });
-  }
-});
-
 // GET /api/submissions/admin/analytics/global — deep global analytics
+// NOTE: Must be before :projectId routes so Express doesn't match 'analytics' as a projectId
 router.get('/admin/analytics/global', requireAdmin, async (req, res) => {
   if (req.adminScope !== 'global') {
     return res.status(403).json({ error: 'Global admins only' });
@@ -217,6 +139,66 @@ router.get('/admin/analytics/global', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Global analytics error:', err);
     res.status(500).json({ error: 'Failed to load global analytics' });
+  }
+});
+
+// GET /api/submissions/admin/:projectId — admin: get all submissions for a project
+router.get('/admin/:projectId', requireAdmin, async (req, res) => {
+  const { projectId } = req.params;
+  const { start_date, end_date, region, version_id } = req.query;
+  let query = `
+    SELECT s.*, u.name as user_name, u.club as user_club, qv.version_number
+    FROM submissions s
+    JOIN users u ON u.id = s.user_id
+    JOIN questionnaire_versions qv ON qv.id = s.questionnaire_version_id
+    WHERE s.project_id = $1`;
+  const params = [projectId];
+  if (start_date) { params.push(start_date); query += ` AND s.submitted_at >= $${params.length}`; }
+  if (end_date) { params.push(end_date); query += ` AND s.submitted_at <= $${params.length}`; }
+  if (region) { params.push(region); query += ` AND s.region = $${params.length}`; }
+  if (version_id) { params.push(version_id); query += ` AND s.questionnaire_version_id = $${params.length}`; }
+  query += ' ORDER BY s.submitted_at DESC';
+  const result = await db.query(query, params);
+  res.json(result.rows);
+});
+
+// GET /api/submissions/admin/:projectId/analytics — quick analytics
+router.get('/admin/:projectId/analytics', requireAdmin, async (req, res) => {
+  const { projectId } = req.params;
+  try {
+    const [volumeRes, regionRes, versionRes, minutesRes] = await Promise.all([
+      db.query(
+        `SELECT DATE(submitted_at) as date, COUNT(*) as count
+         FROM submissions WHERE project_id = $1
+         GROUP BY DATE(submitted_at) ORDER BY date`,
+        [projectId]
+      ),
+      db.query(
+        `SELECT region, COUNT(*) as count FROM submissions
+         WHERE project_id = $1 AND region IS NOT NULL
+         GROUP BY region ORDER BY count DESC`,
+        [projectId]
+      ),
+      db.query(
+        `SELECT qv.version_number, COUNT(*) as count
+         FROM submissions s JOIN questionnaire_versions qv ON qv.id = s.questionnaire_version_id
+         WHERE s.project_id = $1 GROUP BY qv.version_number ORDER BY qv.version_number`,
+        [projectId]
+      ),
+      db.query(
+        `SELECT COALESCE(SUM((answers->>'minutes_of_impact')::numeric), 0) as total_minutes
+         FROM submissions WHERE project_id = $1`,
+        [projectId]
+      ),
+    ]);
+    res.json({
+      volume: volumeRes.rows,
+      regions: regionRes.rows,
+      versions: versionRes.rows,
+      total_minutes: minutesRes.rows[0].total_minutes,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Analytics failed' });
   }
 });
 

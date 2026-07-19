@@ -199,10 +199,10 @@ export default function WelcomeScreen() {
             <div className="flex flex-col items-center gap-8">
               <div className="flex flex-col items-center gap-4 opacity-50">
                 <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Partners under R4C</span>
-                <div className="flex items-center justify-center gap-6 grayscale contrast-200 brightness-200">
-                  <img src={logos.nama_labs} alt="Nama Labs" className="h-6" />
-                  <img src={logos.rotaract_tanzania} alt="Rotaract Tanzania" className="h-6" />
-                  <img src={logos.rotaract_muhimbili} alt="Rotaract Muhimbili" className="h-6" />
+                <div className="flex items-center justify-center gap-6 brightness-0 invert opacity-80">
+                  <img src={logos.nama_labs} alt="Nama Labs" className="h-6 object-contain" />
+                  <img src={logos.rotaract_tanzania} alt="Rotaract Tanzania" className="h-6 object-contain" />
+                  <img src={logos.rotaract_muhimbili} alt="Rotaract Muhimbili" className="h-6 object-contain" />
                 </div>
               </div>
               <button onClick={() => navigate('/admin/login')} className="text-xs font-semibold text-gray-500 hover:text-white transition-colors">
