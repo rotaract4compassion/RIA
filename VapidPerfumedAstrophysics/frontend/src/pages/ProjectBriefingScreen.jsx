@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { t } from '../lib/i18n';
 import api from '../lib/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { ClipboardList } from 'lucide-react';
 
 export default function ProjectBriefingScreen() {
   const { id } = useParams();
@@ -59,7 +60,7 @@ export default function ProjectBriefingScreen() {
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-5"
           style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)' }}
         >
-          📋 {t('project_briefing')}
+          <ClipboardList size={20} className="inline mr-2" /> {t('project_briefing')}
         </div>
 
         {/* Render briefing content (markdown-like plain text) */}

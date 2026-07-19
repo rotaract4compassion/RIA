@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../lib/api';
+import { X, AlertTriangle } from 'lucide-react';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const FIELD_TYPES = ['text', 'number', 'select', 'boolean'];
@@ -44,7 +45,7 @@ function QuestionBuilder({ questions, onChange }) {
             <div className="flex items-center gap-1">
               <button onClick={() => moveQuestion(i, -1)} disabled={i === 0} className="p-1 text-gray-400 disabled:opacity-30">▲</button>
               <button onClick={() => moveQuestion(i, 1)} disabled={i === questions.length - 1} className="p-1 text-gray-400 disabled:opacity-30">▼</button>
-              <button onClick={() => removeQuestion(i)} className="p-1 text-red-400">✕</button>
+              <button onClick={() => removeQuestion(i)} className="p-1 text-red-400"><X size={16} /></button>
             </div>
           </div>
 
@@ -248,7 +249,7 @@ export default function AdminProjectForm() {
       {/* Version warning */}
       {isEdit && existingSubmissionCount > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 text-sm text-amber-800">
-          <p className="font-semibold mb-1">⚠️ Questionnaire has {existingSubmissionCount} submissions</p>
+          <p className="font-semibold mb-1 flex items-center gap-1.5"><AlertTriangle size={16} className="text-amber-500" /> Questionnaire has {existingSubmissionCount} submissions</p>
           <p>Saving a changed questionnaire will create a new version. Existing submissions keep their original questions.</p>
         </div>
       )}

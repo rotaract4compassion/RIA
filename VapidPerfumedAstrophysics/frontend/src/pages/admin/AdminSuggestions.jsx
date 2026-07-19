@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { MessageSquare, Lock } from 'lucide-react';
 
 export default function AdminSuggestions() {
   const [suggestions, setSuggestions] = useState([]);
@@ -37,7 +38,7 @@ export default function AdminSuggestions() {
         <div className="flex justify-center py-12"><LoadingSpinner /></div>
       ) : suggestions.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-          <p className="text-4xl mb-3">💬</p>
+          <div className="text-gray-300 mb-3 flex justify-center"><MessageSquare size={48} strokeWidth={1.5} /></div>
           <p>No suggestions yet</p>
         </div>
       ) : (
@@ -76,7 +77,7 @@ function SuggestionCard({ suggestion: s, onRead }) {
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           {s.is_anonymous ? (
-            <span className="badge bg-gray-100 text-gray-500 text-xs">🔒 Anonymous</span>
+            <span className="badge bg-gray-100 text-gray-500 text-xs flex items-center gap-1 w-max"><Lock size={12} /> Anonymous</span>
           ) : (
             <div>
               <p className="text-sm font-medium text-gray-900">{s.user_name}</p>

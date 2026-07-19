@@ -140,3 +140,29 @@ html, body {
   display: flex;
   transition: transform 0.3s ease-out;
 }
+
+/* Welcome Screen Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-400 { animation-delay: 400ms; }
+
+.shadow-primary\/30 {
+  box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}

@@ -4,6 +4,7 @@ import { t } from '../lib/i18n';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { Bell, BellOff, Pin, Globe, ClipboardList, Users } from 'lucide-react';
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -41,7 +42,7 @@ function BroadcastCard({ broadcast, onRead }) {
             className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
             style={{ backgroundColor: 'var(--color-primary)' }}
           >
-            📌 {t('pinned')}
+            <Pin size={12} className="inline" /> {t('pinned')}
           </span>
         </div>
       )}
@@ -78,9 +79,9 @@ function BroadcastCard({ broadcast, onRead }) {
       {/* Audience badge */}
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-400">
-          {broadcast.audience === 'all' ? '🌐 All users' :
-           broadcast.audience === 'project' ? '📋 Project' :
-           `👥 ${broadcast.club || 'Club'}`}
+          {broadcast.audience === 'all' ? <><Globe size={14} className="inline" /> All users</> :
+           broadcast.audience === 'project' ? <><ClipboardList size={14} className="inline" /> Project</> :
+           <><Users size={14} className="inline" /> {broadcast.club || 'Club'}</>}
         </span>
         {!read && (
           <button
@@ -133,7 +134,7 @@ export default function AnnouncementsScreen() {
           </button>
           <div className="flex-1">
             <h1 className="font-bold text-xl text-gray-900">
-              🔔 {t('announcements')}
+              <Bell size={22} className="inline" /> {t('announcements')}
             </h1>
             {unreadCount > 0 && (
               <p className="text-xs text-gray-400 mt-0.5">
@@ -159,7 +160,7 @@ export default function AnnouncementsScreen() {
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
         ) : broadcasts.length === 0 ? (
           <div className="card text-center py-12 flex flex-col items-center gap-3">
-            <span className="text-5xl">🔕</span>
+            <span className="text-gray-300"><BellOff size={48} strokeWidth={1.5} /></span>
             <p className="font-semibold text-gray-700">{t('no_announcements')}</p>
             <p className="text-xs text-gray-400 max-w-xs">{t('announcements_empty')}</p>
           </div>

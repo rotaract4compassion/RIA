@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { AlertTriangle } from 'lucide-react';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -86,7 +87,7 @@ export default function AdminUsers() {
                     <td className="px-4 py-3 text-right font-medium text-gray-700">{u.submission_count}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-1">
-                        {u.is_flagged && <span className="badge bg-amber-100 text-amber-700">⚠️ Flagged</span>}
+                        {u.is_flagged && <span className="badge bg-amber-100 text-amber-700 flex items-center gap-1 w-max"><AlertTriangle size={12} /> Flagged</span>}
                         {u.is_revoked && <span className="badge bg-red-100 text-red-700">Revoked</span>}
                         {!u.is_flagged && !u.is_revoked && <span className="badge bg-green-100 text-green-700">Active</span>}
                       </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '../lib/i18n';
+import { CheckCircle } from 'lucide-react';
 
 function detectPlatform() {
   const ua = navigator.userAgent;
@@ -64,7 +65,7 @@ export default function AddToHomeScreen() {
   if (installed) {
     return (
       <div className="h-full flex flex-col items-center justify-center bg-white px-8 gap-6 animate-fade-in">
-        <div className="w-20 h-20 rounded-3xl bg-green-50 flex items-center justify-center text-5xl">✓</div>
+        <div className="w-20 h-20 rounded-3xl bg-green-50 text-green-500 flex items-center justify-center"><CheckCircle size={48} strokeWidth={1.5} /></div>
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-900">{t('installed')}</h2>
           <p className="text-gray-500 text-sm mt-1">Ria is ready to use from your home screen</p>

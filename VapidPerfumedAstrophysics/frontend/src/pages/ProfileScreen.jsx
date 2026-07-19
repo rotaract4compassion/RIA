@@ -4,6 +4,7 @@ import { useAuth } from '../store/auth';
 import { t, getLang, setLang } from '../lib/i18n';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
+import { User, Check, Trophy } from 'lucide-react';
 
 const MAX_PIC_DIM = 512; // resize profile pic to max 512px before upload
 const MAX_PIC_BYTES = 300 * 1024; // 300 KB size cap (Supabase free tier friendly)
@@ -119,7 +120,7 @@ export default function ProfileScreen() {
     <div className="h-full flex flex-col bg-gray-50 safe-top">
       {/* Header */}
       <div className="bg-white px-4 pt-5 pb-4 border-b border-gray-100">
-        <h1 className="font-bold text-xl text-gray-900">👤 {t('profile')}</h1>
+        <h1 className="font-bold text-xl text-gray-900 flex items-center gap-2"><User size={22} /> {t('profile')}</h1>
       </div>
 
       <div className="flex-1 scroll-area px-4 py-4 pb-28 flex flex-col gap-4">
@@ -211,7 +212,7 @@ export default function ProfileScreen() {
             onClick={handleSave}
             disabled={saving}
           >
-            {saved ? 'Saved ✓' : saving ? '…' : t('save')}
+            {saved ? <><Check size={16} className="inline" /> Saved</> : saving ? '…' : t('save')}
           </button>
         </div>
 
@@ -258,7 +259,7 @@ export default function ProfileScreen() {
             className="text-sm font-medium text-gray-600 py-1 text-left"
             onClick={() => navigate('/leaderboard')}
           >
-            🏆 View Leaderboard →
+            <span className="flex items-center gap-1.5"><Trophy size={16} className="text-amber-500" /> View Leaderboard →</span>
           </button>
         </div>
 

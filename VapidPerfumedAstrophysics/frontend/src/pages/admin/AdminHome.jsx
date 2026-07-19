@@ -47,7 +47,7 @@ function SystemHealthWidget({ health }) {
         </div>
         {isWarning && (
           <p className="text-xs text-amber-600 mt-1 font-medium">
-            ⚠️ Over 80% of free tier used — consider upgrading to avoid service disruption.
+            <span className="flex items-center gap-1.5"><AlertTriangle size={14} className="inline text-amber-500" /> Over 80% of free tier used — consider upgrading to avoid service disruption.</span>
           </p>
         )}
       </div>

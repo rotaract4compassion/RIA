@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { ClipboardList } from 'lucide-react';
 
 export default function AdminProjects() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function AdminProjects() {
         <div className="flex justify-center py-12"><LoadingSpinner /></div>
       ) : projects.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <p className="text-4xl mb-3">📋</p>
+          <div className="text-gray-300 mb-3 flex justify-center"><ClipboardList size={48} strokeWidth={1.5} /></div>
           <p className="text-gray-500">No projects yet. Create your first one!</p>
         </div>
       ) : (

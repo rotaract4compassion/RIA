@@ -5,6 +5,7 @@ import api from '../lib/api';
 import { offlineDb } from '../lib/db';
 import { syncPendingSubmissions } from '../lib/sync';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { Check, AlertTriangle, MapPin } from 'lucide-react';
 
 const DRAFT_KEY = (id) => `draft_questionnaire_${id}`;
 
@@ -44,7 +45,7 @@ function LocationCapture({ required, onCapture }) {
         )}
         {status === 'captured' && coords && (
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium text-green-700">✓ {t('location_captured')}</p>
+            <p className="text-sm font-medium text-green-700 flex items-center gap-1"><Check size={16} /> {t('location_captured')}</p>
             <p className="text-xs text-gray-500">
               {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
             </p>
@@ -55,7 +56,7 @@ function LocationCapture({ required, onCapture }) {
         )}
         {status === 'denied' && (
           <div className="flex flex-col gap-1">
-            <p className="text-sm text-gray-500">⚠️ {t('location_denied')}</p>
+            <p className="text-sm text-gray-500 flex items-center gap-1"><AlertTriangle size={16} /> {t('location_denied')}</p>
             <p className="text-xs text-gray-400">{required ? t('location_required') : t('location_optional')}</p>
             <button onClick={capture} className="text-xs font-medium mt-2" style={{ color: 'var(--color-primary)' }}>
               {t('retry')}
@@ -347,7 +348,7 @@ export default function QuestionnaireScreen() {
       <div className="flex-1 scroll-area px-5 py-6">
         {isLocationStep ? (
           <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-gray-900">📍 Capture your location</h2>
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2"><MapPin size={20} /> Capture your location</h2>
             <p className="text-sm text-gray-500">
               This helps track where community impact is happening.
               {!locationRequired && ' Location is optional for this questionnaire.'}

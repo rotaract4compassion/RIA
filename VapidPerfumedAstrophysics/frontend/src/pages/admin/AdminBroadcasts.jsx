@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../lib/api';
 import { useAdminAuth } from '../../store/adminAuth';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { X, Pin, Globe, ClipboardList, Users, Megaphone } from 'lucide-react';
 
 const MAX_IMAGE_DIM = 1200;
 const MAX_IMAGE_BYTES = 800 * 1024; // 800 KB cap
@@ -182,7 +183,7 @@ export default function AdminBroadcasts() {
                   <div className="relative rounded-xl overflow-hidden">
                     <img src={imagePreview} alt="" className="w-full object-cover max-h-40" />
                     <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }}
-                      className="absolute top-2 right-2 bg-white/80 rounded-full p-1 text-gray-600 text-xs">✕</button>
+                      className="absolute top-2 right-2 bg-white/80 rounded-full p-1 text-gray-600 text-xs"><X size={14} /></button>
                   </div>
                 ) : (
                   <label className="flex items-center justify-center gap-2 py-6 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 text-sm cursor-pointer hover:border-gray-300">
@@ -230,7 +231,7 @@ export default function AdminBroadcasts() {
                   <input type="checkbox" checked={form.is_priority}
                     onChange={e => setForm(f => ({ ...f, is_priority: e.target.checked }))}
                     className="accent-[var(--color-primary)]" />
-                  <span className="text-sm font-medium text-gray-700">📌 Priority / Pinned</span>
+                  <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5"><Pin size={14} /> Priority / Pinned</span>
                 </label>
                 <div>
                   <label className="text-xs font-medium text-gray-600 block mb-1">Auto-expire after</label>
@@ -248,7 +249,7 @@ export default function AdminBroadcasts() {
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowForm(false)} className="btn-ghost flex-1 border border-gray-200">Cancel</button>
                 <button type="submit" disabled={sending} className="btn-primary flex-1">
-                  {sending ? <LoadingSpinner size={18} color="white" /> : '📣 Send Broadcast'}
+                  {sending ? <LoadingSpinner size={18} color="white" /> : <><Megaphone size={16} className="inline mr-1" /> Send Broadcast</>}
                 </button>
               </div>
             </form>
@@ -261,7 +262,7 @@ export default function AdminBroadcasts() {
         <div className="flex justify-center py-12"><LoadingSpinner /></div>
       ) : broadcasts.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <span className="text-4xl block mb-3">📣</span>
+          <div className="text-gray-300 mb-3 flex justify-center"><Megaphone size={48} strokeWidth={1.5} /></div>
           <p className="text-gray-500">No broadcasts yet. Send your first announcement to field users.</p>
         </div>
       ) : (
@@ -270,9 +271,9 @@ export default function AdminBroadcasts() {
             <div key={b.id} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  {b.is_priority && <span className="badge bg-pink-100 text-pink-700 text-xs">📌 Priority</span>}
+                  {b.is_priority && <span className="badge bg-pink-100 text-pink-700 text-xs flex items-center gap-1"><Pin size={12} /> Priority</span>}
                   <span className={`badge text-xs ${b.audience === 'all' ? 'bg-blue-100 text-blue-700' : b.audience === 'project' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {b.audience === 'all' ? '🌐 All' : b.audience === 'project' ? '📋 Project' : `👥 ${b.club}`}
+                    {b.audience === 'all' ? <><Globe size={12} className="inline" /> All</> : b.audience === 'project' ? <><ClipboardList size={12} className="inline" /> Project</> : <><Users size={12} className="inline" /> {b.club}</>}
                   </span>
                   {b.expires_at && (
                     <span className="badge bg-amber-100 text-amber-700 text-xs">

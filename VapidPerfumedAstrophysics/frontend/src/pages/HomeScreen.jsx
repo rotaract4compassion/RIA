@@ -107,7 +107,11 @@ export default function HomeScreen() {
               className="text-xs font-semibold px-2.5 py-1 rounded-full text-white"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >
-              {user?.identity === 'rotarian' ? '🔵 Rotarian' : '💗 Rotaractor'}
+              {user?.identity === 'rotarian' ? (
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Rotarian</span>
+              ) : (
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-pink-500"></span> Rotaractor</span>
+              )}
             </span>
           </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { AlertTriangle, MapPin } from 'lucide-react';
 
 function exportCSV(data, filename) {
   if (!data.length) return;
@@ -227,7 +228,7 @@ export default function AdminProjectDetail() {
                         </td>
                         <td className="px-4 py-3">
                           {s.is_duplicate_flag && (
-                            <span className="badge bg-amber-100 text-amber-700">⚠️ Dup?</span>
+                            <span className="badge bg-amber-100 text-amber-700 flex items-center gap-1"><AlertTriangle size={12} /> Dup?</span>
                           )}
                         </td>
                       </tr>
@@ -248,7 +249,7 @@ export default function AdminProjectDetail() {
             <VolumeChart data={analytics.volume_over_time} />
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-4">📍 Region activity heatmap</h2>
+            <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><MapPin size={20} className="text-gray-500" /> Region activity heatmap</h2>
             <RegionHeatmap data={analytics.by_region} />
           </div>
           {analytics.by_version.length > 1 && (

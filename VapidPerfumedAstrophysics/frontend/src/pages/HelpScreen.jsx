@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { t, getLang } from '../lib/i18n';
 import BottomNav from '../components/BottomNav';
+import { HelpCircle } from 'lucide-react';
 
 const faqs = [
   {
@@ -70,7 +71,7 @@ export default function HelpScreen() {
     <div className="h-full flex flex-col bg-gray-50 safe-top">
       {/* Header */}
       <div className="bg-white px-4 pt-5 pb-4 border-b border-gray-100">
-        <h1 className="font-bold text-xl text-gray-900">❓ {t('help')}</h1>
+        <h1 className="font-bold text-xl text-gray-900 flex items-center gap-2"><HelpCircle size={22} /> {t('help')}</h1>
         <p className="text-sm text-gray-500 mt-1">{t('faq')}</p>
         <input
           type="search"

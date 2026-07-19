@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { t, getLang } from '../lib/i18n';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
+import { MessageSquare, MailCheck } from 'lucide-react';
 
 const MAX_CHARS = 1000;
 
@@ -37,14 +38,14 @@ export default function SuggestionsScreen() {
     <div className="h-full flex flex-col bg-gray-50 safe-top">
       {/* Header */}
       <div className="bg-white px-4 pt-5 pb-4 border-b border-gray-100">
-        <h1 className="font-bold text-xl text-gray-900">💬 {t('suggestions')}</h1>
+        <h1 className="font-bold text-xl text-gray-900 flex items-center gap-2"><MessageSquare size={22} /> {t('suggestions')}</h1>
         <p className="text-sm text-gray-500 mt-1">Share feedback with project administrators</p>
       </div>
 
       <div className="flex-1 scroll-area px-4 py-5 pb-28 flex flex-col gap-5">
         {sent ? (
           <div className="card text-center flex flex-col items-center gap-4 py-8">
-            <span className="text-5xl">✉️</span>
+            <span className="text-green-500"><MailCheck size={48} strokeWidth={1.5} /></span>
             <div>
               <p className="font-semibold text-gray-900">{t('suggestion_sent')}</p>
               <p className="text-sm text-gray-500 mt-1">Thank you for your feedback.</p>

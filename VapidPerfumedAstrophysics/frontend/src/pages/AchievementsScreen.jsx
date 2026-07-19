@@ -4,7 +4,7 @@ import { t, getLang } from '../lib/i18n';
 import api from '../lib/api';
 import BottomNav from '../components/BottomNav';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { BarChart2, Map, Trophy, ClipboardList, Star } from 'lucide-react';
+import { Trophy, Lock, Sparkles, BarChart2, Map, ClipboardList, Star } from 'lucide-react';
 
 export default function AchievementsScreen() {
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ export default function AchievementsScreen() {
             {/* Unlocked */}
             {unlocked.length > 0 && (
               <div>
-                <h2 className="font-semibold text-gray-900 mb-3">🏆 {t('unlocked')} ({unlocked.length})</h2>
+                <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Trophy size={18} className="text-amber-500" /> {t('unlocked')} ({unlocked.length})</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {unlocked.map(a => (
                     <div key={a.id} className="card text-center flex flex-col items-center gap-2 py-4">
@@ -105,7 +105,7 @@ export default function AchievementsScreen() {
             {/* Locked */}
             {locked.length > 0 && (
               <div>
-                <h2 className="font-semibold text-gray-500 mb-3">🔒 {t('locked')} ({locked.length})</h2>
+                <h2 className="font-semibold text-gray-500 mb-3 flex items-center gap-2"><Lock size={18} /> {t('locked')} ({locked.length})</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {locked.map(a => (
                     <div key={a.id} className="card text-center flex flex-col items-center gap-2 py-4 opacity-60">
@@ -124,7 +124,7 @@ export default function AchievementsScreen() {
 
             {achievements.length === 0 && (
               <div className="text-center py-8 flex flex-col items-center gap-3">
-                <span className="text-5xl">🌟</span>
+                <span className="text-amber-300"><Sparkles size={48} strokeWidth={1.5} /></span>
                 <p className="text-gray-500 text-sm">Submit data to earn your first achievement!</p>
               </div>
             )}
