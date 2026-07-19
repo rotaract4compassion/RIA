@@ -1,4 +1,4 @@
-// Background sync engine
+// Action-based sync engine — no polling, free-tier friendly
 import { offlineDb } from './db';
 import api from './api';
 
@@ -20,7 +20,6 @@ async function refreshBroadcasts() {
   try {
     const data = await api.get('/broadcasts/unread-count');
     localStorage.setItem('ria_unread_broadcasts', String(data.count || 0));
-    // Dispatch custom event so BottomNav can update its badge without polling
     window.dispatchEvent(new CustomEvent('broadcasts-updated', { detail: data }));
   } catch {
     // Non-fatal — offline or server down
@@ -30,11 +29,12 @@ async function refreshBroadcasts() {
 export async function syncPendingSubmissions() {
   if (syncInProgress || !navigator.onLine) return;
 
-  // Also refresh broadcasts on every check-in (piggybacked on sync cycle)
-  refreshBroadcasts();
-
   const pending = await offlineDb.getPendingSubmissions();
-  if (!pending.length) return;
+  if (!pending.length) {
+    // Still refresh broadcasts since we're online and an action happened
+    refreshBroadcasts();
+    return;
+  }
 
   syncInProgress = true;
   emit('syncing');
@@ -53,38 +53,38 @@ export async function syncPendingSubmissions() {
     emit('failed');
   } finally {
     syncInProgress = false;
-    // Apply 30-minute visibility rule
     await offlineDb.applyVisibilityRule();
+    // Piggyback a broadcast refresh after sync
+    refreshBroadcasts();
   }
 }
 
-// Start background sync engine
+// Manual refresh — call from UI refresh button
+export async function manualRefresh() {
+  emit('syncing');
+  try {
+    // Sync any pending submissions first
+    await syncPendingSubmissions();
+    // Always refresh broadcasts on manual action
+    await refreshBroadcasts();
+    // Apply visibility cleanup
+    await offlineDb.applyVisibilityRule();
+    emit('synced');
+  } catch {
+    emit('failed');
+  }
+}
+
+// Start sync engine — action-based only, no intervals
 export function startSyncEngine() {
-  // Sync on connectivity restored
+  // Sync when connectivity is restored
   window.addEventListener('online', () => {
     setTimeout(syncPendingSubmissions, 1000);
-    setTimeout(refreshBroadcasts, 3000);
   });
 
-  // Periodic retry every 5 minutes
-  setInterval(() => {
-    if (navigator.onLine) syncPendingSubmissions();
-  }, 5 * 60 * 1000);
-
-  // Refresh broadcast count every 5 minutes independently
-  setInterval(() => {
-    if (navigator.onLine) refreshBroadcasts();
-  }, 5 * 60 * 1000);
-
-  // Apply visibility rule every 5 minutes
-  setInterval(() => {
-    offlineDb.applyVisibilityRule();
-  }, 5 * 60 * 1000);
-
-  // Initial sync + broadcast fetch on load
+  // Initial sync + broadcast fetch on load (one-time)
   if (navigator.onLine) {
     setTimeout(syncPendingSubmissions, 2000);
-    setTimeout(refreshBroadcasts, 4000);
   }
 }
 

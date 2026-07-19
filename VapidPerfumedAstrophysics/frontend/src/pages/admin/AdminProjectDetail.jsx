@@ -2,27 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { AlertTriangle, MapPin } from 'lucide-react';
-
-function exportCSV(data, filename) {
-  if (!data.length) return;
-  const headers = Object.keys(data[0]);
-  const rows = data.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(','));
-  const csv = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-function exportJSON(data, filename) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
+import MapHeatmap from '../../components/MapHeatmap';
+import { downloadCSV } from '../../lib/exportUtils';
+import { AlertTriangle, MapPin, Printer, Download } from 'lucide-react';
 
 // Simple heatmap component
 function RegionHeatmap({ data }) {
@@ -131,7 +113,7 @@ export default function AdminProjectDetail() {
   if (loading) return <div className="flex justify-center py-12"><LoadingSpinner /></div>;
   if (!project) return <div className="p-6 text-gray-500">Project not found</div>;
 
-  const tabs = ['submissions', 'analytics', 'impact-report', 'settings'];
+  const tabs = ['submissions', 'analytics', 'geospatial', 'impact-report', 'settings'];
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -181,16 +163,16 @@ export default function AdminProjectDetail() {
             <p className="text-sm text-gray-500">{submissions.length} submission{submissions.length !== 1 ? 's' : ''}</p>
             <div className="flex gap-2">
               <button
-                onClick={() => exportCSV(submissions, `${project.name}-submissions.csv`)}
-                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                onClick={() => downloadCSV(submissions, `${project.name}-submissions.csv`)}
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] flex items-center gap-1.5"
               >
-                Export CSV
+                <Download size={14} /> Export CSV
               </button>
               <button
-                onClick={() => exportJSON(submissions, `${project.name}-submissions.json`)}
-                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                onClick={() => window.print()}
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
               >
-                Export JSON
+                <Printer size={14} /> Export PDF
               </button>
             </div>
           </div>
@@ -238,6 +220,23 @@ export default function AdminProjectDetail() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {tab === 'geospatial' && (
+        <div className="flex flex-col gap-4">
+          <div className="card p-2 h-[500px]">
+            <MapHeatmap
+              data={submissions.filter(s => s.location_lat && s.location_lng).map(s => ({
+                lat: s.location_lat,
+                lng: s.location_lng
+              }))}
+              height="100%"
+            />
+          </div>
+          <p className="text-xs text-gray-400 text-center">
+            {submissions.filter(s => s.location_lat).length} out of {submissions.length} submissions have geospatial data.
+          </p>
         </div>
       )}
 

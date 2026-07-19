@@ -38,7 +38,7 @@ export default function AdminBroadcasts() {
   const [projects, setProjects] = useState([]);
   const [form, setForm] = useState({
     title: '', body: '', audience: 'all', project_id: '', club: '',
-    is_priority: false, expires_days: '',
+    is_priority: false, expires_days: '', scheduled_at: '',
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -97,6 +97,10 @@ export default function AdminBroadcasts() {
         ? new Date(Date.now() + parseInt(form.expires_days) * 86400000).toISOString()
         : null;
 
+      const scheduled_at = form.scheduled_at
+        ? new Date(form.scheduled_at).toISOString()
+        : null;
+
       await api.post('/broadcasts/admin', {
         title: form.title.trim(),
         body: form.body.trim(),
@@ -106,6 +110,7 @@ export default function AdminBroadcasts() {
         club: form.audience === 'club' ? form.club.trim() : null,
         is_priority: form.is_priority,
         expires_at,
+        scheduled_at,
       });
 
       setForm({ title: '', body: '', audience: 'all', project_id: '', club: '', is_priority: false, expires_days: '' });
@@ -169,9 +174,14 @@ export default function AdminBroadcasts() {
                   className="input-field" placeholder="Important update…" maxLength={120} required />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1.5">Message</label>
-                <textarea rows={4} value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
-                  className="input-field resize-none" placeholder="Write your announcement…" required />
+                <label className="text-sm font-medium text-gray-700 block mb-1">Message Body</label>
+                <textarea
+                  value={form.body}
+                  onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
+                  className="input-field min-h-[120px] resize-y"
+                  placeholder="Type your announcement here..."
+                />
+                <p className="text-xs text-gray-500 mt-1">Supports **bold**, *italic*, and - bullet lists.</p>
               </div>
 
               {/* Image */}
@@ -244,6 +254,15 @@ export default function AdminBroadcasts() {
                     <option value="30">30 days</option>
                   </select>
                 </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 block mb-1">Schedule for later (optional)</label>
+                  <input 
+                    type="datetime-local" 
+                    value={form.scheduled_at} 
+                    onChange={e => setForm(f => ({ ...f, scheduled_at: e.target.value }))}
+                    className="input-field text-sm"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-1">
@@ -275,6 +294,16 @@ export default function AdminBroadcasts() {
                   <span className={`badge text-xs ${b.audience === 'all' ? 'bg-blue-100 text-blue-700' : b.audience === 'project' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                     {b.audience === 'all' ? <><Globe size={12} className="inline" /> All</> : b.audience === 'project' ? <><ClipboardList size={12} className="inline" /> Project</> : <><Users size={12} className="inline" /> {b.club}</>}
                   </span>
+                  {b.is_priority && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[var(--color-primary)] text-white ml-2 uppercase tracking-wide">
+                      Pinned
+                    </span>
+                  )}
+                  {b.scheduled_at && new Date(b.scheduled_at) > new Date() && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-600 text-white ml-2 uppercase tracking-wide">
+                      Scheduled
+                    </span>
+                  )}
                   {b.expires_at && (
                     <span className="badge bg-amber-100 text-amber-700 text-xs">
                       Expires {new Date(b.expires_at).toLocaleDateString()}

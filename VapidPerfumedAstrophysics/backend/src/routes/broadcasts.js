@@ -17,6 +17,7 @@ router.get('/', requireUser, async (req, res) => {
        FROM broadcasts b
        WHERE
          (b.expires_at IS NULL OR b.expires_at > NOW())
+         AND (b.scheduled_at IS NULL OR b.scheduled_at <= NOW())
          AND (
            b.audience = 'all'
            OR (b.audience = 'project' AND b.project_id IN (
@@ -45,6 +46,7 @@ router.get('/unread-count', requireUser, async (req, res) => {
        FROM broadcasts b
        WHERE
          (b.expires_at IS NULL OR b.expires_at > NOW())
+         AND (b.scheduled_at IS NULL OR b.scheduled_at <= NOW())
          AND (
            b.audience = 'all'
            OR (b.audience = 'project' AND b.project_id IN (
@@ -99,7 +101,7 @@ router.get('/admin', requireAdmin, async (req, res) => {
 
 // POST /api/broadcasts/admin — create broadcast
 router.post('/admin', requireAdmin, async (req, res) => {
-  const { title, body, image_url, audience, project_id, club, is_priority, expires_at } = req.body;
+  const { title, body, image_url, audience, project_id, club, is_priority, expires_at, scheduled_at } = req.body;
   if (!title || !body) return res.status(400).json({ error: 'title and body required' });
   if (!['all', 'project', 'club'].includes(audience)) {
     return res.status(400).json({ error: 'audience must be all | project | club' });
@@ -110,10 +112,10 @@ router.post('/admin', requireAdmin, async (req, res) => {
   }
   try {
     const result = await db.query(
-      `INSERT INTO broadcasts (title, body, image_url, audience, project_id, club, is_priority, expires_at, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      `INSERT INTO broadcasts (title, body, image_url, audience, project_id, club, is_priority, expires_at, scheduled_at, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
       [title, body, image_url || null, audience, project_id || null, club || null,
-       is_priority || false, expires_at || null, req.adminId]
+       is_priority || false, expires_at || null, scheduled_at || null, req.adminId]
     );
     await db.query(
       `INSERT INTO admin_audit_log (actor_admin_id, action, target_type, target_id, metadata)

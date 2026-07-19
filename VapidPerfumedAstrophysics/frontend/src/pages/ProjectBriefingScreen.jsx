@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { t } from '../lib/i18n';
 import api from '../lib/api';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { ClipboardList } from 'lucide-react';
 
@@ -64,30 +65,8 @@ export default function ProjectBriefingScreen() {
         </div>
 
         {/* Render briefing content (markdown-like plain text) */}
-        <div className="prose-ria">
-          {project.briefing_content.split('\n').map((line, i) => {
-            if (!line.trim()) return <div key={i} className="h-3" />;
-            // Simple heading detection
-            if (line.startsWith('# ')) return (
-              <h2 key={i} className="text-lg font-bold text-gray-900 mb-2 mt-4 first:mt-0">
-                {line.slice(2)}
-              </h2>
-            );
-            if (line.startsWith('## ')) return (
-              <h3 key={i} className="text-base font-semibold text-gray-800 mb-1.5 mt-3">
-                {line.slice(3)}
-              </h3>
-            );
-            if (line.startsWith('- ') || line.startsWith('• ')) return (
-              <div key={i} className="flex gap-2 mb-1.5">
-                <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
-                <p className="text-sm text-gray-700 leading-relaxed">{line.slice(2)}</p>
-              </div>
-            );
-            return (
-              <p key={i} className="text-sm text-gray-700 leading-relaxed mb-2">{line}</p>
-            );
-          })}
+        <div className="prose-ria text-sm text-gray-700">
+          <MarkdownRenderer content={project.briefing_content} />
         </div>
       </div>
 

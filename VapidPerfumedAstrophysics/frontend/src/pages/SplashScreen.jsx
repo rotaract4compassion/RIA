@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
+import { logos } from '../lib/logos';
 
 export default function SplashScreen() {
   const navigate = useNavigate();
@@ -68,9 +69,9 @@ export default function SplashScreen() {
       <div className="absolute bottom-8 flex flex-col items-center gap-2 opacity-50">
         <p className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Partners under R4C</p>
         <div className="flex items-center gap-4">
-          <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="h-5 object-contain" />
-          <img src="/partners/rotaract-tanzania-icon.svg" alt="Rotaract Tanzania" className="h-5 object-contain" />
-          <img src="/partners/rotaract-muhimbili-icon.svg" alt="Rotaract Muhimbili" className="h-5 object-contain" />
+          <img src={logos.nama_labs} alt="Nama Labs" className="h-5 object-contain" />
+          <img src={logos.rotaract_tanzania} alt="Rotaract Tanzania" className="h-5 object-contain" />
+          <img src={logos.rotaract_muhimbili} alt="Rotaract Muhimbili" className="h-5 object-contain" />
         </div>
       </div>
     </div>

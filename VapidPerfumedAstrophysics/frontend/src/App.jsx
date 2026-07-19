@@ -34,6 +34,8 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminAdmins from './pages/admin/AdminAdmins';
 import AdminSuggestions from './pages/admin/AdminSuggestions';
 import AdminBroadcasts from './pages/admin/AdminBroadcasts';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminMap from './pages/admin/AdminMap';
 
 import OfflineBanner from './components/OfflineBanner';
 import LoadingScreen from './components/LoadingScreen';
@@ -82,6 +84,8 @@ function AdminApp() {
       <Route path="login" element={!admin ? <AdminLoginScreen /> : <Navigate to="/admin" />} />
       <Route path="/" element={admin ? <AdminLayout /> : <Navigate to="/admin/login" />}>
         <Route index element={<AdminHome />} />
+        <Route path="analytics" element={<AdminAnalytics />} />
+        <Route path="map" element={<AdminMap />} />
         <Route path="projects" element={<AdminProjects />} />
         <Route path="projects/new" element={<AdminProjectForm />} />
         <Route path="projects/:id" element={<AdminProjectDetail />} />

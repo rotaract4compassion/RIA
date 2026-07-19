@@ -132,18 +132,92 @@ router.get('/admin/:projectId/analytics', requireAdmin, async (req, res) => {
        WHERE s.project_id = $1 GROUP BY qv.version_number ORDER BY qv.version_number`,
       [projectId]
     ),
-    db.query(
-      `SELECT COALESCE(SUM((answers->>'minutes_of_impact')::numeric), 0) as total_minutes
-       FROM submissions WHERE project_id = $1`,
-      [projectId]
-    ),
-  ]);
-  res.json({
-    volume_over_time: volumeRes.rows,
-    by_region: regionRes.rows,
-    by_version: versionRes.rows,
-    total_minutes: minutesRes.rows[0].total_minutes,
-  });
+  try {
+    const [volumeRes, regionRes, versionRes, minutesRes] = await Promise.all([
+      db.query(
+        `SELECT DATE(submitted_at) as date, COUNT(*) as count
+         FROM submissions WHERE project_id = $1
+         GROUP BY DATE(submitted_at) ORDER BY date`,
+        [projectId]
+      ),
+      db.query(
+        `SELECT region, COUNT(*) as count FROM submissions
+         WHERE project_id = $1 AND region IS NOT NULL
+         GROUP BY region ORDER BY count DESC`,
+        [projectId]
+      ),
+      db.query(
+        `SELECT qv.version_number, COUNT(*) as count
+         FROM submissions s JOIN questionnaire_versions qv ON qv.id = s.questionnaire_version_id
+         WHERE s.project_id = $1 GROUP BY qv.version_number ORDER BY qv.version_number`,
+        [projectId]
+      ),
+      db.query(
+        `SELECT COALESCE(SUM((answers->>'minutes_of_impact')::numeric), 0) as total_minutes
+         FROM submissions WHERE project_id = $1`,
+        [projectId]
+      ),
+    ]);
+    res.json({
+      volume: volumeRes.rows,
+      regions: regionRes.rows,
+      versions: versionRes.rows,
+      total_minutes: minutesRes.rows[0].total_minutes,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Analytics failed' });
+  }
+});
+
+// GET /api/submissions/admin/analytics/global — deep global analytics
+router.get('/admin/analytics/global', requireAdmin, async (req, res) => {
+  if (req.adminScope !== 'global') {
+    return res.status(403).json({ error: 'Global admins only' });
+  }
+  try {
+    const [trendRes, regionRes, projectRes, totalsRes, heatmapRes] = await Promise.all([
+      db.query(
+        `SELECT DATE(submitted_at) as date, COUNT(*) as count
+         FROM submissions
+         WHERE submitted_at > NOW() - INTERVAL '30 days'
+         GROUP BY DATE(submitted_at) ORDER BY date`
+      ),
+      db.query(
+        `SELECT region, COUNT(*) as count FROM submissions
+         WHERE region IS NOT NULL
+         GROUP BY region ORDER BY count DESC LIMIT 10`
+      ),
+      db.query(
+        `SELECT p.name, COUNT(s.id) as count
+         FROM submissions s JOIN projects p ON p.id = s.project_id
+         GROUP BY p.name ORDER BY count DESC LIMIT 10`
+      ),
+      db.query(
+        `SELECT 
+          COUNT(*) as total_submissions,
+          COUNT(DISTINCT user_id) as total_users,
+          COALESCE(SUM((answers->>'minutes_of_impact')::numeric), 0) as total_minutes,
+          SUM(CASE WHEN is_duplicate_flag THEN 1 ELSE 0 END) as flagged_submissions
+         FROM submissions`
+      ),
+      db.query(
+        `SELECT s.location_lat as lat, s.location_lng as lng, p.name as project_name, p.id as project_id
+         FROM submissions s
+         JOIN projects p ON p.id = s.project_id
+         WHERE s.location_lat IS NOT NULL AND s.location_lng IS NOT NULL`
+      )
+    ]);
+    res.json({
+      trends: trendRes.rows,
+      regions: regionRes.rows,
+      projects: projectRes.rows,
+      totals: totalsRes.rows[0],
+      heatmap: heatmapRes.rows
+    });
+  } catch (err) {
+    console.error('Global analytics error:', err);
+    res.status(500).json({ error: 'Failed to load global analytics' });
+  }
 });
 
 // GET /api/submissions/admin/:projectId/impact-report — report data

@@ -166,3 +166,53 @@ html, body {
 .shadow-primary\/30 {
   box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
+
+/* Leaderboard Celebrations */
+@keyframes celebrate-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(247, 168, 27, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(247, 168, 27, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(247, 168, 27, 0); }
+}
+
+.animate-celebrate {
+  animation: celebrate-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-color: var(--color-gold) !important;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+.confetti {
+  position: fixed;
+  top: -10px;
+  z-index: 100;
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-gold);
+  animation: confetti-fall 3s linear forwards;
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    background-color: white !important;
+  }
+  aside, .bottom-nav, button {
+    display: none !important;
+  }
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+    margin-bottom: 2rem !important;
+  }
+  .scroll-area {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  /* Force charts to render cleanly */
+  .recharts-wrapper {
+    page-break-inside: avoid;
+  }
+}

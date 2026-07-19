@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '../lib/i18n';
 import api from '../lib/api';
+import { manualRefresh } from '../lib/sync';
 import BottomNav from '../components/BottomNav';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import { Bell, BellOff, Pin, Globe, ClipboardList, Users } from 'lucide-react';
 
 function timeAgo(dateStr) {
@@ -74,7 +76,9 @@ function BroadcastCard({ broadcast, onRead }) {
       )}
 
       {/* Body */}
-      <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{broadcast.body}</p>
+      <div className="text-sm text-gray-600">
+        <MarkdownRenderer content={broadcast.body} />
+      </div>
 
       {/* Audience badge */}
       <div className="flex items-center justify-between">
@@ -101,6 +105,7 @@ export default function AnnouncementsScreen() {
   const navigate = useNavigate();
   const [broadcasts, setBroadcasts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -117,6 +122,17 @@ export default function AnnouncementsScreen() {
     }
     setLoading(false);
   }, []);
+
+  const handleRefresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      await manualRefresh();
+      await load();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => { load(); }, [load]);
 
@@ -143,11 +159,12 @@ export default function AnnouncementsScreen() {
             )}
           </div>
           <button
-            onClick={load}
+            onClick={handleRefresh}
+            disabled={refreshing}
             className="p-2 text-gray-400 rounded-xl hover:bg-gray-100 transition-colors"
             aria-label="Refresh"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <svg className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>

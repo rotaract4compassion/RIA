@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../store/adminAuth';
 
-import { LayoutDashboard, ClipboardList, Users, Key, MessageSquare, Megaphone } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Users, Key, MessageSquare, Megaphone, BarChart2, Map } from 'lucide-react';
 
 const navItems = [
   { to: '/admin', label: 'Overview', icon: <LayoutDashboard size={18} />, end: true },
+  { to: '/admin/analytics', label: 'Analytics', icon: <BarChart2 size={18} /> },
+  { to: '/admin/map', label: 'Geospatial', icon: <Map size={18} /> },
   { to: '/admin/projects', label: 'Projects', icon: <ClipboardList size={18} /> },
   { to: '/admin/users', label: 'Users', icon: <Users size={18} /> },
   { to: '/admin/admins', label: 'Admins', icon: <Key size={18} /> },

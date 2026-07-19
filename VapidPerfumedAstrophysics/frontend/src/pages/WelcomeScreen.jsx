@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t, getLang } from '../lib/i18n';
+import { logos } from '../lib/logos';
 import LangToggle from '../components/LangToggle';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -54,7 +55,7 @@ export default function WelcomeScreen() {
 
   if (!bgLoaded) {
     return (
-      <div className="h-full bg-gray-900 flex flex-col items-center justify-center fixed inset-0 z-50">
+      <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center fixed inset-0 z-50">
         <LoadingSpinner color="white" />
         <p className="text-gray-400 text-sm mt-4 tracking-widest uppercase animate-pulse">Loading Ria</p>
       </div>
@@ -64,7 +65,7 @@ export default function WelcomeScreen() {
   const isSw = getLang() === 'sw';
 
   return (
-    <div className="bg-gray-900 min-h-screen relative overflow-x-hidden flex flex-col">
+    <div className="bg-gray-900 relative overflow-x-hidden h-full w-full" style={{ overflowY: 'auto' }}>
       {/* Fixed Background Image with Dark Overlay */}
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
@@ -101,7 +102,7 @@ export default function WelcomeScreen() {
             </Reveal>
             <Reveal delay={300}>
               <p className="text-lg text-gray-300 leading-relaxed drop-shadow-md font-medium">
-                {isSw ? 'Ria imetengenezwa kutatua hilo. Sio jukwaa la kibiashara, ni miundombinu yetu.' : 'Ria is built to fix that. Infrastructure, not a product.'}
+                {isSw ? 'Ria, tutengeneze athari pamoja.' : 'Ria, let us create impact.'}
               </p>
             </Reveal>
           </div>
@@ -199,9 +200,9 @@ export default function WelcomeScreen() {
               <div className="flex flex-col items-center gap-4 opacity-50">
                 <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Partners under R4C</span>
                 <div className="flex items-center justify-center gap-6 grayscale contrast-200 brightness-200">
-                  <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="h-6" />
-                  <img src="/partners/rotaract-tanzania-icon.svg" alt="Rotaract Tanzania" className="h-6" />
-                  <img src="/partners/rotaract-muhimbili-icon.svg" alt="Rotaract Muhimbili" className="h-6" />
+                  <img src={logos.nama_labs} alt="Nama Labs" className="h-6" />
+                  <img src={logos.rotaract_tanzania} alt="Rotaract Tanzania" className="h-6" />
+                  <img src={logos.rotaract_muhimbili} alt="Rotaract Muhimbili" className="h-6" />
                 </div>
               </div>
               <button onClick={() => navigate('/admin/login')} className="text-xs font-semibold text-gray-500 hover:text-white transition-colors">

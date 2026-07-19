@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 import { t, getLang } from '../lib/i18n';
 import api from '../lib/api';
+import { manualRefresh } from '../lib/sync';
 import BottomNav from '../components/BottomNav';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { BarChart2, Map, Trophy, FolderOpen, Smartphone } from 'lucide-react';
+import { BarChart2, Map, Trophy, FolderOpen, Smartphone, RefreshCw } from 'lucide-react';
 
 function ProjectCard({ project, onClick }) {
   return (
@@ -64,6 +65,7 @@ export default function HomeScreen() {
   const [projects, setProjects] = useState([]);
   const [impact, setImpact] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [, forceUpdate] = useState(0);
 
   useEffect(() => {
@@ -72,8 +74,8 @@ export default function HomeScreen() {
     return () => window.removeEventListener('lang-change', h);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     try {
       const [projectsRes, impactRes] = await Promise.all([
         api.get('/projects/mine'),
@@ -84,11 +86,22 @@ export default function HomeScreen() {
     } catch (e) {
       console.error('Load error:', e);
     } finally {
-      setLoading(false);
+      if (!isRefresh) setLoading(false);
     }
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  const handleRefresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      await manualRefresh();
+      await load(true);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
@@ -98,7 +111,16 @@ export default function HomeScreen() {
       <div className="bg-white px-5 pt-5 pb-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">{t('hello')}, {user?.name?.split(' ')[0]}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-gray-500">{t('hello')}, {user?.name?.split(' ')[0]}</p>
+              <button 
+                onClick={handleRefresh} 
+                disabled={refreshing}
+                className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+              </button>
+            </div>
             <h1 className="text-xl font-bold text-gray-900">{user?.club}</h1>
           </div>
           <div className="flex items-center gap-2">

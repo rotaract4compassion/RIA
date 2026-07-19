@@ -27,6 +27,7 @@ export default function LeaderboardScreen() {
   const [scope, setScope] = useState('global'); // global | project
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [celebration, setCelebration] = useState(null);
   const [, forceUpdate] = useState(0);
 
   useEffect(() => {
@@ -41,6 +42,18 @@ export default function LeaderboardScreen() {
       const params = new URLSearchParams({ metric, scope, view });
       const rows = await api.get(`/leaderboard?${params}`);
       setData(rows);
+
+      const me = rows.find(r => r.is_me);
+      if (me) {
+        const cacheKey = `ria_rank_${view}_${metric}_${scope}`;
+        const prevRank = parseInt(localStorage.getItem(cacheKey) || '999999');
+        if (me.rank < prevRank && prevRank !== 999999) {
+          setCelebration({ from: prevRank, to: me.rank });
+          // Auto-hide celebration after 5 seconds
+          setTimeout(() => setCelebration(null), 5000);
+        }
+        localStorage.setItem(cacheKey, me.rank);
+      }
     } catch (e) {
       console.error(e);
       setData([]);
@@ -126,7 +139,7 @@ export default function LeaderboardScreen() {
       </div>
 
       {/* My rank banner (if in view) */}
-      {myEntry && (
+      {myEntry && !celebration && (
         <div
           className="mx-4 mt-3 px-4 py-2.5 rounded-xl flex items-center justify-between"
           style={{ backgroundColor: 'var(--color-primary-light)' }}
@@ -138,6 +151,27 @@ export default function LeaderboardScreen() {
             {rankBadge(myEntry.rank)} — {myEntry.score} {UNIT_LABELS[metric]}
           </span>
         </div>
+      )}
+
+      {celebration && (
+        <>
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div key={i} className="confetti" style={{
+              left: `${Math.random() * 100}vw`,
+              animationDelay: `${Math.random() * 2}s`,
+              backgroundColor: ['#F7A81B', '#E91E8C', '#4CAF50', '#2196F3'][Math.floor(Math.random() * 4)]
+            }}></div>
+          ))}
+          <div
+            className="mx-4 mt-3 px-4 py-3 rounded-xl flex flex-col items-center justify-center animate-celebrate text-center"
+            style={{ backgroundColor: 'var(--color-gold)', color: 'white' }}
+          >
+            <span className="text-sm font-bold drop-shadow">Rank Up! 🎉</span>
+            <span className="text-xs font-medium opacity-90 drop-shadow">
+              You moved from #{celebration.from} to #{celebration.to}
+            </span>
+          </div>
+        </>
       )}
 
       {/* List */}
