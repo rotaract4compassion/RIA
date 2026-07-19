@@ -4,6 +4,35 @@ import { t, getLang } from '../lib/i18n';
 import LangToggle from '../components/LangToggle';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+function Reveal({ children, delay = 0 }) {
+  const [ref, setRef] = useState(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!ref) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true);
+        observer.unobserve(ref);
+      }
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    observer.observe(ref);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return (
+    <div
+      ref={setRef}
+      className={`transition-all duration-1000 transform ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function WelcomeScreen() {
   const navigate = useNavigate();
   const [, forceUpdate] = useState(0);
@@ -25,27 +54,29 @@ export default function WelcomeScreen() {
 
   if (!bgLoaded) {
     return (
-      <div className="h-full bg-gray-900 flex flex-col items-center justify-center">
+      <div className="h-full bg-gray-900 flex flex-col items-center justify-center fixed inset-0 z-50">
         <LoadingSpinner color="white" />
         <p className="text-gray-400 text-sm mt-4 tracking-widest uppercase animate-pulse">Loading Ria</p>
       </div>
     );
   }
 
+  const isSw = getLang() === 'sw';
+
   return (
-    <div className="h-full bg-gray-900 relative overflow-hidden flex flex-col">
-      {/* Background Image with Dark Overlay */}
+    <div className="bg-gray-900 min-h-screen relative overflow-x-hidden flex flex-col">
+      {/* Fixed Background Image with Dark Overlay */}
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
         style={{ 
           backgroundImage: 'url(/images/hero-bg.png)',
-          opacity: bgLoaded ? 0.6 : 0
+          opacity: bgLoaded ? 0.4 : 0
         }}
       />
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/95" />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-gray-900/95 via-gray-900/80 to-gray-900/95" />
 
       {/* Navigation Bar */}
-      <div className="relative z-50 px-6 py-4 flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-gradient-to-b from-gray-900/80 to-transparent">
         <div className="flex items-center gap-2">
           <img src="/icons/ria-app-icon-whitebg-192.png" alt="Ria Logo" className="w-8 h-8 rounded-lg shadow-sm" />
           <span className="font-bold text-lg text-white tracking-tight drop-shadow-md">Ria</span>
@@ -55,49 +86,129 @@ export default function WelcomeScreen() {
         </div>
       </div>
 
-      <div className="flex-1 relative z-10 flex flex-col justify-end px-6 pb-12 pt-8">
+      <div className="relative z-10 flex flex-col">
         
-        {/* Text Content */}
-        <div className="mb-8 animate-fade-in-up">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 drop-shadow-lg">
-            Proof of impact.
-          </h1>
-          <div className="w-12 h-1 bg-pink-500 rounded-full mb-6"></div>
-          <p className="text-base text-gray-200 max-w-md leading-relaxed mb-4 drop-shadow-md">
-            {getLang() === 'sw' 
-              ? 'Vilabu vya Rotary na Rotaract nchini Tanzania vinafanya kazi kubwa. Sasa tuna sehemu moja ya kuhifadhi ushahidi wote.' 
-              : 'Rotary and Rotaract clubs across Tanzania do real work. Boreholes, health screenings, hygiene programs. But the proof is often scattered.'}
-          </p>
-          <p className="text-base text-gray-200 max-w-md leading-relaxed drop-shadow-md font-medium">
-             {getLang() === 'sw' ? 'Ria imetengenezwa kutatua hilo. Sio jukwaa la kibiashara, ni miundombinu yetu.' : 'Ria is built to fix that. Infrastructure, not a product.'}
-          </p>
-        </div>
-
-        {/* Action Card */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 shadow-2xl animate-fade-in-up animation-delay-200">
-          <div className="flex flex-col gap-3">
-            <button className="btn-primary py-4 text-lg shadow-lg" onClick={() => navigate('/register')}>
-              {t('register')}
-            </button>
-            <button className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold rounded-2xl py-4 transition-colors" onClick={() => navigate('/login')}>
-              {t('login')}
-            </button>
+        {/* Hero Section (Full Viewport Height) */}
+        <div className="min-h-[100dvh] flex flex-col justify-end px-6 pb-12 pt-24 max-w-md mx-auto w-full">
+          <div className="mb-8">
+            <Reveal delay={100}>
+              <h1 className="text-5xl font-extrabold text-white leading-tight mb-6 drop-shadow-lg">
+                Proof of impact.
+              </h1>
+            </Reveal>
+            <Reveal delay={200}>
+              <div className="w-12 h-1.5 bg-pink-500 rounded-full mb-6"></div>
+            </Reveal>
+            <Reveal delay={300}>
+              <p className="text-lg text-gray-300 leading-relaxed drop-shadow-md font-medium">
+                {isSw ? 'Ria imetengenezwa kutatua hilo. Sio jukwaa la kibiashara, ni miundombinu yetu.' : 'Ria is built to fix that. Infrastructure, not a product.'}
+              </p>
+            </Reveal>
           </div>
-        </div>
 
-        {/* Admin Link & Partner Logos */}
-        <div className="mt-8 flex flex-col items-center gap-6 animate-fade-in-up animation-delay-400">
-          <div className="flex flex-col items-center gap-3 opacity-60">
-            <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Partners under R4C</span>
-            <div className="flex items-center gap-5 grayscale contrast-200 brightness-200">
-              <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="h-5" />
-              <img src="/partners/rotaract-tanzania-icon.svg" alt="Rotaract Tanzania" className="h-5" />
-              <img src="/partners/rotaract-muhimbili-icon.svg" alt="Rotaract Muhimbili" className="h-5" />
+          <Reveal delay={400}>
+            {/* Action Card */}
+            <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl mb-8">
+              <div className="flex flex-col gap-3">
+                <button className="btn-primary py-4 text-lg shadow-lg" onClick={() => navigate('/register')}>
+                  {t('register')}
+                </button>
+                <button className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-2xl py-4 transition-colors" onClick={() => navigate('/login')}>
+                  {t('login')}
+                </button>
+              </div>
             </div>
-          </div>
-          <button onClick={() => navigate('/admin/login')} className="text-xs font-semibold text-gray-400 hover:text-white transition-colors">
-            Admin? Sign in here &rarr;
-          </button>
+          </Reveal>
+
+          <Reveal delay={500}>
+            <div className="flex justify-center">
+              <div className="animate-bounce flex flex-col items-center text-white/30 mt-4">
+                <span className="text-xs font-semibold tracking-widest uppercase mb-2">Scroll for the story</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* Scrolling Story Sections */}
+        <div className="px-6 py-20 flex flex-col gap-32 max-w-md mx-auto w-full">
+          
+          <Reveal>
+            <h2 className="text-2xl font-bold text-white mb-4">The Gap</h2>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              {isSw 
+                ? 'Vilabu vya Rotary na Rotaract nchini Tanzania vinafanya kazi kubwa. Lakini ushahidi mara nyingi umetawanyika.' 
+                : 'Rotary and Rotaract clubs across Tanzania do real work. Boreholes, health screenings, hygiene programs. But the proof is often scattered across separate club sites and one-off writeups.'}
+            </p>
+          </Reveal>
+
+          <Reveal>
+            <div className="p-6 rounded-3xl bg-blue-900/30 border border-blue-500/20 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-4">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              </div>
+              <h2 className="text-2xl font-bold text-blue-300 mb-4">Built for the Field</h2>
+              <p className="text-lg text-blue-100/70 leading-relaxed">
+                {isSw 
+                  ? 'Inafanya kazi bila intaneti, inajisawazisha mtandao unaporudi, na ni rahisi kutumia.' 
+                  : 'It works fully offline, syncs when signal comes back, runs on free tier hosting to stay cheap, and stays mobile and simple enough that volunteers actually use it.'}
+              </p>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <div className="p-6 rounded-3xl bg-pink-900/30 border border-pink-500/20 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center mb-4">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+              </div>
+              <h2 className="text-2xl font-bold text-pink-300 mb-4">Make it count</h2>
+              <p className="text-lg text-pink-100/70 leading-relaxed">
+                {isSw 
+                  ? 'Rekodi dakika za mchango wako, fungua mikoa mipya, na upande kwenye ubao wa viongozi.' 
+                  : 'A bit of gamification too. Minutes of impact, regions reached, a leaderboard—because showing up should feel like something.'}
+              </p>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <div className="p-6 rounded-3xl bg-amber-900/30 border border-amber-500/20 backdrop-blur-sm">
+              <h2 className="text-2xl font-bold text-amber-300 mb-4">One app, two identities</h2>
+              <p className="text-lg text-amber-100/70 leading-relaxed">
+                Navy and gold for Rotary. Hot pink and white for Rotaract. The app knows which one to show you based on your club.
+              </p>
+            </div>
+          </Reveal>
+
+        </div>
+
+        {/* Bottom CTA & Partners */}
+        <div className="px-6 pb-20 pt-10 flex flex-col items-center text-center w-full relative z-10 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent">
+          <Reveal>
+            <h2 className="text-3xl font-extrabold text-white mb-8">Ready to prove it?</h2>
+            <div className="w-full flex flex-col gap-3 max-w-xs mx-auto mb-16">
+              <button className="btn-primary py-4 text-lg shadow-lg" onClick={() => navigate('/register')}>
+                {t('register')}
+              </button>
+              <button className="bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold rounded-2xl py-4 transition-colors" onClick={() => navigate('/login')}>
+                {t('login')}
+              </button>
+            </div>
+
+            {/* Admin Link & Partner Logos */}
+            <div className="flex flex-col items-center gap-8">
+              <div className="flex flex-col items-center gap-4 opacity-50">
+                <span className="text-[10px] text-gray-400 tracking-wider uppercase font-medium">Partners under R4C</span>
+                <div className="flex items-center justify-center gap-6 grayscale contrast-200 brightness-200">
+                  <img src="/partners/nama-labs-icon.svg" alt="Nama Labs" className="h-6" />
+                  <img src="/partners/rotaract-tanzania-icon.svg" alt="Rotaract Tanzania" className="h-6" />
+                  <img src="/partners/rotaract-muhimbili-icon.svg" alt="Rotaract Muhimbili" className="h-6" />
+                </div>
+              </div>
+              <button onClick={() => navigate('/admin/login')} className="text-xs font-semibold text-gray-500 hover:text-white transition-colors">
+                Admin? Sign in here &rarr;
+              </button>
+            </div>
+          </Reveal>
         </div>
 
       </div>
