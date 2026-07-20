@@ -271,11 +271,12 @@ router.get('/admin/:projectId/analytics', requireAdmin, async (req, res) => {
 // GET /api/submissions/admin/:projectId/impact-report — report data
 router.get('/admin/:projectId/impact-report', requireAdmin, async (req, res) => {
   const { projectId } = req.params;
-  const { start_date, end_date } = req.query; // season/round filtering
+  const { start_date, end_date, tag } = req.query; // season/round filtering
   let dateFilter = '';
   const params = [projectId];
   if (start_date) { params.push(start_date); dateFilter += ` AND s.submitted_at >= $${params.length}`; }
   if (end_date) { params.push(end_date); dateFilter += ` AND s.submitted_at <= $${params.length}`; }
+  if (tag) { params.push(tag); dateFilter += ` AND s.answers->>'season_round' = $${params.length}`; }
 
   const [projRes, statsRes, regionsRes, usersRes, trendRes, topAnswersRes] = await Promise.all([
     db.query('SELECT name, description, club_org FROM projects WHERE id = $1', [projectId]),
@@ -374,6 +375,23 @@ router.post('/admin/:projectId/import', requireAdmin, async (req, res) => {
     }
   }
   res.json({ imported, errors, total: rows.length });
+});
+
+// DELETE /api/submissions/admin/:projectId/bulk-delete — delete by tag
+router.delete('/admin/:projectId/bulk-delete', requireAdmin, async (req, res) => {
+  const { projectId } = req.params;
+  const { tag } = req.query;
+  if (!tag) return res.status(400).json({ error: 'Tag parameter is required' });
+
+  try {
+    const result = await db.query(
+      `DELETE FROM submissions WHERE project_id = $1 AND answers->>'season_round' = $2 RETURNING id`,
+      [projectId, tag]
+    );
+    res.json({ deleted: result.rowCount });
+  } catch (err) {
+    res.status(500).json({ error: 'Bulk delete failed' });
+  }
 });
 
 async function checkAchievements(userId, projectId, region) {

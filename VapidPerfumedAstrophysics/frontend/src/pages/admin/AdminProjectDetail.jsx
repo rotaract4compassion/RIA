@@ -216,6 +216,23 @@ export default function AdminProjectDetail() {
               </button>
               <button
                 onClick={async () => {
+                  const tag = prompt('Enter the exact Season/Round tag you want to delete:');
+                  if (!tag) return;
+                  if (!confirm(`Are you sure you want to permanently delete ALL submissions tagged with "${tag}"?`)) return;
+                  try {
+                    const res = await api.delete(`/submissions/admin/${id}/bulk-delete?tag=${encodeURIComponent(tag)}`);
+                    alert(`Successfully deleted ${res.deleted} submissions.`);
+                    load();
+                  } catch (e) {
+                    alert('Failed to delete bulk data');
+                  }
+                }}
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center gap-1.5"
+              >
+                <AlertTriangle size={14} /> Delete by Tag
+              </button>
+              <button
+                onClick={async () => {
                   const element = document.getElementById('impact-report-printable');
                   if (!element) return;
                   
@@ -384,16 +401,22 @@ export default function AdminProjectDetail() {
         <div className="flex flex-col gap-6">
           {/* Season / Round filter */}
           <div className="flex items-center gap-3 flex-wrap no-print">
-            <label className="text-xs font-medium text-gray-500">Date range (season/round):</label>
+            <label className="text-xs font-medium text-gray-500">Filter by Date:</label>
             <input type="date" className="input-field py-1.5 text-sm w-auto"
               onChange={e => { reportStartRef.current = e.target.value; }} />
             <span className="text-gray-400 text-xs">to</span>
             <input type="date" className="input-field py-1.5 text-sm w-auto"
               onChange={e => { reportEndRef.current = e.target.value; }} />
+            <span className="text-gray-400 text-xs font-medium mx-1">OR</span>
+            <label className="text-xs font-medium text-gray-500">Tag:</label>
+            <input type="text" placeholder="e.g. Season 1" className="input-field py-1.5 text-sm w-40"
+              id="reportTagFilter" />
             <button onClick={() => {
               const qs = new URLSearchParams();
               if (reportStartRef.current) qs.set('start_date', reportStartRef.current);
               if (reportEndRef.current) qs.set('end_date', reportEndRef.current);
+              const tagVal = document.getElementById('reportTagFilter')?.value;
+              if (tagVal) qs.set('tag', tagVal);
               api.get(`/submissions/admin/${id}/impact-report?${qs}`).then(setReport);
             }} className="btn-primary w-auto px-4 py-1.5 text-xs">Generate</button>
           </div>
