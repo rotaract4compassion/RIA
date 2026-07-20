@@ -129,7 +129,7 @@ export default function AdminProjectDetail() {
   if (loading) return <div className="flex justify-center py-12"><LoadingSpinner /></div>;
   if (!project) return <div className="p-6 text-gray-500">Project not found</div>;
 
-  const tabs = ['submissions', 'analytics', 'geospatial', 'impact-report', 'settings'];
+  const tabs = ['submissions', 'analytics', 'geospatial', 'impact-report', 'history', 'settings'];
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -213,23 +213,6 @@ export default function AdminProjectDetail() {
                 className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
               >
                 <Edit3 size={14} /> {csvPreview ? 'Close Editor' : 'Edit Before Export'}
-              </button>
-              <button
-                onClick={async () => {
-                  const tag = prompt('Enter the exact Season/Round tag you want to delete:');
-                  if (!tag) return;
-                  if (!confirm(`Are you sure you want to permanently delete ALL submissions tagged with "${tag}"?`)) return;
-                  try {
-                    const res = await api.delete(`/submissions/admin/${id}/bulk-delete?tag=${encodeURIComponent(tag)}`);
-                    alert(`Successfully deleted ${res.deleted} submissions.`);
-                    load();
-                  } catch (e) {
-                    alert('Failed to delete bulk data');
-                  }
-                }}
-                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center gap-1.5"
-              >
-                <AlertTriangle size={14} /> Delete by Tag
               </button>
               <button
                 onClick={async () => {
@@ -648,13 +631,38 @@ export default function AdminProjectDetail() {
               </div>
             </>
           )}
+        </div>
+      )}
 
-          {/* CSV Import */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm no-print mt-8">
-            <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><Upload size={18} /> Import Historical Data (CSV)</h3>
-            <p className="text-xs text-gray-500 mb-4">
-              Upload a CSV file to bulk-import historical data into this project. <strong>It does not need to be uniform.</strong> Old data with different column names will be safely archived and stored as-is without data loss.
-            </p>
+      {/* History tab */}
+      {tab === 'history' && (
+        <div className="flex flex-col gap-6">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="font-bold text-gray-900 flex items-center gap-2"><Upload size={18} /> Import Historical Data (CSV)</h3>
+                <p className="text-xs text-gray-500 mt-1 max-w-lg">
+                  Upload a CSV file to bulk-import historical data into this project. <strong>It does not need to be uniform.</strong> Old data with missing values, empty cells, or different column names will be safely stored as-is without data loss.
+                </p>
+              </div>
+              <button
+                onClick={async () => {
+                  const tag = prompt('Enter the exact Season/Round tag you want to delete:');
+                  if (!tag) return;
+                  if (!confirm(`Are you sure you want to permanently delete ALL submissions tagged with "${tag}"?`)) return;
+                  try {
+                    const res = await api.delete(`/submissions/admin/${id}/bulk-delete?tag=${encodeURIComponent(tag)}`);
+                    alert(`Successfully deleted ${res.deleted} submissions.`);
+                    load();
+                  } catch (e) {
+                    alert('Failed to delete bulk data');
+                  }
+                }}
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center gap-1.5"
+              >
+                <AlertTriangle size={14} /> Bulk Delete by Tag
+              </button>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
               <div className="flex-1 w-full">
@@ -686,7 +694,10 @@ export default function AdminProjectDetail() {
                     // Match commas not inside quotes (simple CSV parser)
                     const vals = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
                     const obj = {};
-                    headers.forEach((h, i) => { if (vals[i]) obj[h] = vals[i]; });
+                    headers.forEach((h, i) => { 
+                      // Allow missing/null values and empty strings to map explicitly
+                      obj[h] = vals[i] !== undefined ? vals[i] : null; 
+                    });
                     return { answers: obj, region: obj.region || null, submitted_at: obj.submitted_at || null };
                   });
                   
