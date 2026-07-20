@@ -4,7 +4,7 @@ import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MapHeatmap from '../../components/MapHeatmap';
 import { downloadCSV } from '../../lib/exportUtils';
-import { AlertTriangle, MapPin, Printer, Download, Upload } from 'lucide-react';
+import { AlertTriangle, MapPin, Printer, Download, Upload, Edit3 } from 'lucide-react';
 
 // Simple heatmap component
 function RegionHeatmap({ data }) {
@@ -70,8 +70,21 @@ export default function AdminProjectDetail() {
   const [analytics, setAnalytics] = useState(null);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [csvPreview, setCsvPreview] = useState(null); // {headers, rows} for editable CSV
   const reportStartRef = useRef('');
   const reportEndRef = useRef('');
+
+  // Locally-persisted report text fields
+  const storageKey = `report_edits_${id}`;
+  const getSavedEdits = () => {
+    try { return JSON.parse(localStorage.getItem(storageKey)) || {}; } catch { return {}; }
+  };
+  const [reportEdits, setReportEdits] = useState(getSavedEdits);
+  const updateEdit = (key, value) => {
+    const next = { ...reportEdits, [key]: value };
+    setReportEdits(next);
+    localStorage.setItem(storageKey, JSON.stringify(next));
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -165,19 +178,79 @@ export default function AdminProjectDetail() {
             <p className="text-sm text-gray-500">{submissions.length} submission{submissions.length !== 1 ? 's' : ''}</p>
             <div className="flex gap-2">
               <button
-                onClick={() => downloadCSV(submissions, `${project.name}-submissions.csv`)}
+                onClick={() => {
+                  if (csvPreview) {
+                    // Export edited data
+                    downloadCSV(csvPreview.rows.map(r => {
+                      const obj = {};
+                      csvPreview.headers.forEach((h, i) => { obj[h] = r[i]; });
+                      return obj;
+                    }), `${project.name}-submissions.csv`);
+                  } else {
+                    downloadCSV(submissions, `${project.name}-submissions.csv`);
+                  }
+                }}
                 className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] flex items-center gap-1.5"
               >
                 <Download size={14} /> Export CSV
               </button>
               <button
-                onClick={() => window.print()}
+                onClick={() => {
+                  if (csvPreview) { setCsvPreview(null); return; }
+                  // Build editable table from submissions
+                  if (!submissions.length) return;
+                  const allKeys = new Set();
+                  const baseKeys = ['user_name', 'user_club', 'region', 'submitted_at'];
+                  baseKeys.forEach(k => allKeys.add(k));
+                  submissions.forEach(s => {
+                    if (s.answers && typeof s.answers === 'object') Object.keys(s.answers).forEach(k => allKeys.add(k));
+                  });
+                  const headers = Array.from(allKeys);
+                  const rows = submissions.map(s => headers.map(h => baseKeys.includes(h) ? (s[h] ?? '') : (s.answers?.[h] ?? '')));
+                  setCsvPreview({ headers, rows });
+                }}
                 className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
               >
-                <Printer size={14} /> Export PDF
+                <Edit3 size={14} /> {csvPreview ? 'Close Editor' : 'Edit Before Export'}
               </button>
             </div>
           </div>
+
+          {/* Editable CSV Table */}
+          {csvPreview && (
+            <div className="bg-white rounded-xl border border-gray-200 overflow-auto max-h-[400px] shadow-sm">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    {csvPreview.headers.map((h, i) => (
+                      <th key={i} className="px-2 py-2 text-left font-semibold text-gray-500 whitespace-nowrap border-b">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvPreview.rows.map((row, ri) => (
+                    <tr key={ri} className="border-b border-gray-50 hover:bg-gray-50">
+                      {row.map((cell, ci) => (
+                        <td key={ci} className="px-2 py-1">
+                          <input
+                            type="text"
+                            value={String(cell ?? '')}
+                            onChange={e => {
+                              const newRows = [...csvPreview.rows];
+                              newRows[ri] = [...newRows[ri]];
+                              newRows[ri][ci] = e.target.value;
+                              setCsvPreview({ ...csvPreview, rows: newRows });
+                            }}
+                            className="w-full min-w-[80px] bg-transparent border-0 focus:ring-1 focus:ring-[var(--color-primary)] rounded px-1 py-0.5 text-gray-700"
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {submissions.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
@@ -297,9 +370,17 @@ export default function AdminProjectDetail() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Impact Report</p>
-                      <h2 className="text-2xl font-extrabold text-gray-900">{report.project?.name}</h2>
+                      <h2
+                        className="text-2xl font-extrabold text-gray-900 outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded px-1 -mx-1"
+                        contentEditable suppressContentEditableWarning
+                        onBlur={e => updateEdit('title', e.target.textContent)}
+                      >{reportEdits.title || report.project?.name}</h2>
                       {report.project?.club_org && <p className="text-sm text-gray-500 mt-1">{report.project.club_org}</p>}
-                      {report.project?.description && <p className="text-sm text-gray-600 mt-2 max-w-lg leading-relaxed">{report.project.description}</p>}
+                      <p
+                        className="text-sm text-gray-600 mt-2 max-w-lg leading-relaxed outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded px-1 -mx-1 min-h-[1.5em]"
+                        contentEditable suppressContentEditableWarning
+                        onBlur={e => updateEdit('description', e.target.textContent)}
+                      >{reportEdits.description || report.project?.description || 'Click to add a description...'}</p>
                     </div>
                     <img src="/icons/ria-app-icon-whitebg-192.png" alt="Ria" className="w-14 h-14 rounded-2xl shadow-sm" />
                   </div>
@@ -311,6 +392,18 @@ export default function AdminProjectDetail() {
                 </div>
 
                 <div className="px-8 py-6 flex flex-col gap-8">
+                  {/* Executive Summary — editable */}
+                  <div>
+                    <h3 className="font-bold text-sm text-gray-700 mb-2">Executive Summary</h3>
+                    <textarea
+                      className="w-full text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-lg p-3 border border-gray-100 focus:border-[var(--color-primary)] focus:ring-0 resize-none min-h-[80px] outline-none"
+                      placeholder="Write a brief executive summary for this report... (saved locally)"
+                      value={reportEdits.summary || ''}
+                      onChange={e => updateEdit('summary', e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+
                   {/* KPI Cards */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
@@ -412,6 +505,25 @@ export default function AdminProjectDetail() {
                           <span key={i} className="text-[11px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">{p.name}{p.club ? ` (${p.club})` : ''}</span>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Signoff — editable */}
+                  {(reportEdits.signoff || true) && (
+                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                      <h3 className="font-bold text-sm text-gray-700 mb-2">Prepared By</h3>
+                      <input
+                        className="w-full text-sm text-gray-700 bg-transparent border-0 border-b border-gray-200 focus:border-[var(--color-primary)] focus:ring-0 outline-none pb-1 mb-1"
+                        placeholder="Your name / title"
+                        value={reportEdits.signoff || ''}
+                        onChange={e => updateEdit('signoff', e.target.value)}
+                      />
+                      <input
+                        className="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-gray-200 focus:border-[var(--color-primary)] focus:ring-0 outline-none pb-1"
+                        placeholder="Organization / role (optional)"
+                        value={reportEdits.signoffOrg || ''}
+                        onChange={e => updateEdit('signoffOrg', e.target.value)}
+                      />
                     </div>
                   )}
 
