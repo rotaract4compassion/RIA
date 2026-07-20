@@ -64,6 +64,7 @@ export default function HomeScreen({ tab = 'home' }) {
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [impact, setImpact] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [, forceUpdate] = useState(0);
@@ -77,12 +78,14 @@ export default function HomeScreen({ tab = 'home' }) {
   const load = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
     try {
-      const [projectsRes, impactRes] = await Promise.all([
+      const [projectsRes, impactRes, leaderRes] = await Promise.all([
         api.get('/projects/mine'),
         api.get('/achievements/impact'),
+        api.get('/leaderboard?metric=submissions&scope=global&view=individual')
       ]);
       setProjects(projectsRes);
       setImpact(impactRes);
+      setLeaderboard(leaderRes);
     } catch (e) {
       console.error('Load error:', e);
     } finally {
@@ -155,6 +158,25 @@ export default function HomeScreen({ tab = 'home' }) {
           <>
             {/* Impact strip */}
             <ImpactStrip impact={impact} />
+
+            {/* Leaderboard teaser */}
+            <button
+              className="card text-left flex items-center justify-between active:scale-95 transition-transform bg-gradient-to-r from-indigo-50 to-white border-indigo-100"
+              onClick={() => navigate('/leaderboard')}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-indigo-500 bg-white p-2 rounded-xl shadow-sm"><Trophy size={24} /></span>
+                <div>
+                  <p className="font-semibold text-sm text-gray-900">Leaderboard Rank</p>
+                  <p className="text-xs text-gray-500">Global Submissions</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-extrabold text-indigo-600">
+                  {leaderboard.find(r => r.is_me) ? `#${leaderboard.find(r => r.is_me).rank}` : '50+'}
+                </p>
+              </div>
+            </button>
 
             {/* Achievements teaser */}
             {impact?.achievement_count > 0 && (

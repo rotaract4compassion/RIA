@@ -26,6 +26,7 @@ export default function LeaderboardScreen() {
   const [metric, setMetric] = useState('submissions');
   const [scope, setScope] = useState('global'); // global | project
   const [data, setData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [celebration, setCelebration] = useState(null);
   const [, forceUpdate] = useState(0);
@@ -138,6 +139,17 @@ export default function LeaderboardScreen() {
         ))}
       </div>
 
+      {/* Search Bar */}
+      <div className="bg-white border-b border-gray-100 px-4 py-2">
+        <input
+          type="text"
+          placeholder={`Search ${view === 'individual' ? 'name or club' : 'club'}...`}
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="w-full bg-gray-50 border border-gray-100 rounded-xl text-sm px-4 py-2 focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition-shadow"
+        />
+      </div>
+
       {/* My rank banner (if in view) */}
       {myEntry && !celebration && (
         <div
@@ -184,8 +196,18 @@ export default function LeaderboardScreen() {
             <p className="text-gray-500 text-sm">No data yet — be the first!</p>
           </div>
         ) : (
-          data.map(row => {
-            const isMe = row.is_me;
+          data
+            .filter(row => {
+              if (!searchQuery) return true;
+              const sq = searchQuery.toLowerCase();
+              if (view === 'individual') {
+                return row.name?.toLowerCase().includes(sq) || row.club?.toLowerCase().includes(sq);
+              } else {
+                return row.club?.toLowerCase().includes(sq);
+              }
+            })
+            .map(row => {
+              const isMe = row.is_me;
             return (
               <div
                 key={row.rank}
