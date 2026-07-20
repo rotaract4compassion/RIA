@@ -200,60 +200,87 @@ html, body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  /* Unlock ALL height/overflow constraints that trap content in 1 page */
+  html, body, #root {
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
   body {
     background-color: white !important;
-    margin: 0 !important;
-    padding: 0 !important;
   }
   /* Hide everything that shouldn't print */
-  aside, .bottom-nav, .no-print, nav {
+  aside, .bottom-nav, .no-print, nav, button, input[type="file"], input[type="date"], select {
     display: none !important;
   }
-  /* The admin sidebar */
-  .admin-sidebar {
+  /* Admin layout — tear down the flex h-screen jail */
+  .flex.h-screen,
+  [class*="h-screen"] {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  [class*="overflow-hidden"],
+  [class*="overflow-y-auto"] {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  /* Admin sidebar — kill it */
+  [class*="admin-sidebar"],
+  [class*="w-64"],
+  [class*="w-16"] {
     display: none !important;
   }
-  /* Make the main content full width */
-  .admin-content, main, [class*="max-w-"] {
+  /* Make content fill page width */
+  main, [class*="max-w-"], [class*="flex-1"] {
     max-width: 100% !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 100% !important;
   }
-  /* Report card looks clean */
+  /* Report container — clean and borderless */
   #impact-report-printable {
     border: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
   }
-  /* Preserve background colors */
-  #impact-report-printable [style*="background"] {
+  /* Preserve gradient backgrounds */
+  #impact-report-printable [style*="background"],
+  [style*="backgroundColor"] {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   .card {
     border: none !important;
     box-shadow: none !important;
-    margin-bottom: 2rem !important;
   }
   .scroll-area {
     overflow: visible !important;
     height: auto !important;
   }
-  /* Force charts to render cleanly */
+  /* Recharts */
   .recharts-wrapper {
     page-break-inside: avoid;
   }
-  /* Tabs - hide */
+  /* Tabs — hide */
   [class*="border-b"][class*="gap-1"] {
     display: none !important;
   }
-  /* Page breaks */
+  /* Smart page breaks */
   h3 {
     page-break-after: avoid;
   }
   .grid {
     page-break-inside: avoid;
+  }
+  /* Page margins */
+  @page {
+    margin: 1cm;
+    size: A4;
   }
 }
 @keyframes splashCrossfadeA {

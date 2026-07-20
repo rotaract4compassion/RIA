@@ -4,7 +4,8 @@ import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MapHeatmap from '../../components/MapHeatmap';
 import { downloadCSV } from '../../lib/exportUtils';
-import { AlertTriangle, MapPin, Printer, Download, Upload, Edit3 } from 'lucide-react';
+import { AlertTriangle, MapPin, Printer, Download, Upload, Edit3, Tag } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Simple heatmap component
 function RegionHeatmap({ data }) {
@@ -419,32 +420,49 @@ export default function AdminProjectDetail() {
                     ))}
                   </div>
 
-                  {/* Trend Chart (simple bar) */}
+                  {/* Trend Chart (Recharts) */}
                   {report.trend?.length > 0 && (
-                    <div>
+                    <div className="h-48 w-full mt-4">
                       <h3 className="font-bold text-sm text-gray-700 mb-3">Submissions Over Time</h3>
-                      <div className="flex items-end gap-[2px] h-24 bg-gray-50 rounded-lg p-2">
-                        {report.trend.map(({ date, count }) => {
-                          const max = Math.max(...report.trend.map(t => parseInt(t.count)));
-                          return (
-                            <div key={date} className="flex-1 group relative" title={`${new Date(date).toLocaleDateString()}: ${count}`}>
-                              <div
-                                className="w-full rounded-t transition-all"
-                                style={{
-                                  height: `${(parseInt(count) / max) * 100}%`,
-                                  backgroundColor: 'var(--color-primary)',
-                                  opacity: 0.75,
-                                  minHeight: 2,
-                                }}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="flex justify-between text-[9px] text-gray-400 mt-1 px-1">
-                        <span>{report.trend.length > 0 ? new Date(report.trend[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
-                        <span>{report.trend.length > 0 ? new Date(report.trend[report.trend.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
-                      </div>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={report.trend} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                          <XAxis 
+                            dataKey="date" 
+                            tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            tick={{ fontSize: 10, fill: '#9ca3af' }}
+                            axisLine={false}
+                            tickLine={false}
+                            minTickGap={20}
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 10, fill: '#9ca3af' }}
+                            axisLine={false}
+                            tickLine={false}
+                            allowDecimals={false}
+                          />
+                          <Tooltip 
+                            labelFormatter={(val) => new Date(val).toLocaleDateString()}
+                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '4 4' }}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="count" 
+                            stroke="var(--color-primary)" 
+                            strokeWidth={2}
+                            fillOpacity={1} 
+                            fill="url(#colorCount)" 
+                            activeDot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </div>
                   )}
 
@@ -549,29 +567,60 @@ export default function AdminProjectDetail() {
           {/* CSV Import */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm no-print">
             <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><Upload size={18} /> Import Data (CSV)</h3>
-            <p className="text-xs text-gray-500 mb-3">Upload a CSV file to bulk-import submission data into this project. Column headers should match your questionnaire field IDs.</p>
-            <input type="file" accept=".csv" className="text-sm text-gray-500" onChange={async (e) => {
-              const file = e.target.files[0];
-              if (!file) return;
-              const text = await file.text();
-              const lines = text.split('\n').filter(Boolean);
-              if (lines.length < 2) { alert('CSV must have a header row and at least one data row.'); return; }
-              const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-              const rows = lines.slice(1).map(line => {
-                const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-                const obj = {};
-                headers.forEach((h, i) => { if (vals[i]) obj[h] = vals[i]; });
-                return { answers: obj, region: obj.region || null, submitted_at: obj.submitted_at || null };
-              });
-              if (!confirm(`Import ${rows.length} rows into "${project.name}"?`)) return;
-              try {
-                const res = await api.post(`/submissions/admin/${id}/import`, { rows });
-                alert(`Imported ${res.imported} of ${res.total} rows. ${res.errors ? res.errors + ' errors.' : ''}`);
-                load();
-              } catch (err) {
-                alert('Import failed: ' + err.message);
-              }
-            }} />
+            <p className="text-xs text-gray-500 mb-4">Upload a CSV file to bulk-import submission data into this project. Column headers should match your questionnaire field IDs.</p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
+              <div className="flex-1 w-full">
+                <label className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                  <Tag size={14} /> Assign to Season / Round (Optional)
+                </label>
+                <input 
+                  type="text" 
+                  id="csv-import-tag"
+                  placeholder="e.g. Season 1, Q2 2026..." 
+                  className="input-field py-1.5 text-sm w-full bg-white"
+                />
+              </div>
+              <div className="flex-1 w-full">
+                <label className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                  <Upload size={14} /> Select CSV File
+                </label>
+                <input type="file" accept=".csv" className="text-sm text-gray-600 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[var(--color-primary-light)] file:text-[var(--color-primary)] hover:file:bg-[var(--color-primary)] hover:file:text-white transition-colors cursor-pointer w-full" onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const tagInput = document.getElementById('csv-import-tag').value.trim();
+                  
+                  const text = await file.text();
+                  const lines = text.split('\n').filter(Boolean);
+                  if (lines.length < 2) { alert('CSV must have a header row and at least one data row.'); e.target.value = null; return; }
+                  
+                  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+                  const rows = lines.slice(1).map(line => {
+                    // Match commas not inside quotes (simple CSV parser)
+                    const vals = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
+                    const obj = {};
+                    headers.forEach((h, i) => { if (vals[i]) obj[h] = vals[i]; });
+                    return { answers: obj, region: obj.region || null, submitted_at: obj.submitted_at || null };
+                  });
+                  
+                  if (!confirm(`Import ${rows.length} rows into "${project.name}"${tagInput ? ` assigned to [${tagInput}]` : ''}?`)) {
+                    e.target.value = null;
+                    return;
+                  }
+                  
+                  try {
+                    const res = await api.post(`/submissions/admin/${id}/import`, { rows, importTag: tagInput });
+                    alert(`Imported ${res.imported} of ${res.total} rows. ${res.errors ? res.errors + ' errors.' : ''}`);
+                    load();
+                    e.target.value = null;
+                    document.getElementById('csv-import-tag').value = '';
+                  } catch (err) {
+                    alert('Import failed: ' + err.message);
+                    e.target.value = null;
+                  }
+                }} />
+              </div>
+            </div>
           </div>
         </div>
       )}

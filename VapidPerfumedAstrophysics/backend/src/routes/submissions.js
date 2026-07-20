@@ -335,7 +335,7 @@ router.get('/admin/:projectId/impact-report', requireAdmin, async (req, res) => 
 // POST /api/submissions/admin/:projectId/import — CSV import
 router.post('/admin/:projectId/import', requireAdmin, async (req, res) => {
   const { projectId } = req.params;
-  const { rows } = req.body; // Array of { answers: {...}, region?, submitted_at? }
+  const { rows, importTag } = req.body; // Array of { answers: {...}, region?, submitted_at? }
   if (!Array.isArray(rows) || rows.length === 0) {
     return res.status(400).json({ error: 'No rows provided' });
   }
@@ -352,6 +352,10 @@ router.post('/admin/:projectId/import', requireAdmin, async (req, res) => {
   let errors = 0;
   for (const row of rows) {
     try {
+      const answers = row.answers || row;
+      if (importTag) {
+        answers.season_round = importTag;
+      }
       await db.query(
         `INSERT INTO submissions (project_id, user_id, questionnaire_version_id, answers, region, submitted_at)
          VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -359,7 +363,7 @@ router.post('/admin/:projectId/import', requireAdmin, async (req, res) => {
           projectId,
           req.adminId, // attribute to admin who imported
           qvId,
-          JSON.stringify(row.answers || row),
+          JSON.stringify(answers),
           row.region || null,
           row.submitted_at || new Date().toISOString(),
         ]

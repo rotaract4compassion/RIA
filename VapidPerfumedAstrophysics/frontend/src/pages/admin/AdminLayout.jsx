@@ -26,7 +26,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 overflow-hidden print:block print:h-auto print:overflow-visible">
       {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-60 bg-white border-r border-gray-100 flex flex-col
@@ -94,7 +94,7 @@ export default function AdminLayout() {
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:block print:overflow-visible print:h-auto">
         {/* Mobile top bar */}
         <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
           <button
@@ -111,7 +111,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Page */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto print:overflow-visible print:h-auto print:block">
           <Outlet />
         </main>
       </div>
