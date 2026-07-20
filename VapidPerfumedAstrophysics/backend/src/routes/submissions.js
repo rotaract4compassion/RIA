@@ -271,35 +271,105 @@ router.get('/admin/:projectId/analytics', requireAdmin, async (req, res) => {
 // GET /api/submissions/admin/:projectId/impact-report — report data
 router.get('/admin/:projectId/impact-report', requireAdmin, async (req, res) => {
   const { projectId } = req.params;
-  const [projRes, statsRes, regionsRes, usersRes] = await Promise.all([
-    db.query('SELECT name, description FROM projects WHERE id = $1', [projectId]),
+  const { start_date, end_date } = req.query; // season/round filtering
+  let dateFilter = '';
+  const params = [projectId];
+  if (start_date) { params.push(start_date); dateFilter += ` AND s.submitted_at >= $${params.length}`; }
+  if (end_date) { params.push(end_date); dateFilter += ` AND s.submitted_at <= $${params.length}`; }
+
+  const [projRes, statsRes, regionsRes, usersRes, trendRes, topAnswersRes] = await Promise.all([
+    db.query('SELECT name, description, club_org FROM projects WHERE id = $1', [projectId]),
     db.query(
       `SELECT COUNT(*) as total_submissions,
         COUNT(DISTINCT user_id) as unique_participants,
         MIN(submitted_at) as first_submission,
         MAX(submitted_at) as last_submission,
         COALESCE(SUM((answers->>'minutes_of_impact')::numeric), 0) as total_minutes
-       FROM submissions WHERE project_id = $1`,
-      [projectId]
+       FROM submissions s WHERE s.project_id = $1${dateFilter}`,
+      params
     ),
     db.query(
-      `SELECT region, COUNT(*) as count FROM submissions
-       WHERE project_id = $1 AND region IS NOT NULL GROUP BY region ORDER BY count DESC`,
-      [projectId]
+      `SELECT region, COUNT(*) as count FROM submissions s
+       WHERE s.project_id = $1${dateFilter} AND region IS NOT NULL GROUP BY region ORDER BY count DESC`,
+      params
     ),
     db.query(
       `SELECT DISTINCT u.name, u.club FROM submissions s
-       JOIN users u ON u.id = s.user_id WHERE s.project_id = $1 LIMIT 100`,
-      [projectId]
+       JOIN users u ON u.id = s.user_id WHERE s.project_id = $1${dateFilter} LIMIT 100`,
+      params
+    ),
+    db.query(
+      `SELECT DATE(submitted_at) as date, COUNT(*) as count
+       FROM submissions s WHERE s.project_id = $1${dateFilter}
+       GROUP BY DATE(submitted_at) ORDER BY date`,
+      params
+    ),
+    db.query(
+      `SELECT answers FROM submissions s WHERE s.project_id = $1${dateFilter} LIMIT 500`,
+      params
     ),
   ]);
+
+  // Aggregate top answer values for each field
+  const fieldAggregates = {};
+  (topAnswersRes.rows || []).forEach(r => {
+    if (!r.answers || typeof r.answers !== 'object') return;
+    Object.entries(r.answers).forEach(([key, val]) => {
+      if (!fieldAggregates[key]) fieldAggregates[key] = {};
+      const v = String(val);
+      fieldAggregates[key][v] = (fieldAggregates[key][v] || 0) + 1;
+    });
+  });
+
   res.json({
     project: projRes.rows[0],
     stats: statsRes.rows[0],
     regions: regionsRes.rows,
     participants: usersRes.rows,
+    trend: trendRes.rows,
+    field_aggregates: fieldAggregates,
     generated_at: new Date().toISOString(),
   });
+});
+
+// POST /api/submissions/admin/:projectId/import — CSV import
+router.post('/admin/:projectId/import', requireAdmin, async (req, res) => {
+  const { projectId } = req.params;
+  const { rows } = req.body; // Array of { answers: {...}, region?, submitted_at? }
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return res.status(400).json({ error: 'No rows provided' });
+  }
+  // Get the current questionnaire version
+  const qvRes = await db.query(
+    `SELECT id FROM questionnaire_versions WHERE project_id = $1 ORDER BY version_number DESC LIMIT 1`,
+    [projectId]
+  );
+  if (!qvRes.rows.length) {
+    return res.status(400).json({ error: 'No questionnaire configured for this project' });
+  }
+  const qvId = qvRes.rows[0].id;
+  let imported = 0;
+  let errors = 0;
+  for (const row of rows) {
+    try {
+      await db.query(
+        `INSERT INTO submissions (project_id, user_id, questionnaire_version_id, answers, region, submitted_at)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          projectId,
+          req.adminId, // attribute to admin who imported
+          qvId,
+          JSON.stringify(row.answers || row),
+          row.region || null,
+          row.submitted_at || new Date().toISOString(),
+        ]
+      );
+      imported++;
+    } catch (err) {
+      errors++;
+    }
+  }
+  res.json({ imported, errors, total: rows.length });
 });
 
 async function checkAchievements(userId, projectId, region) {

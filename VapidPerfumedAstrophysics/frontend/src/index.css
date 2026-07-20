@@ -196,11 +196,40 @@ html, body {
 
 /* Print Styles for PDF Export */
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
   body {
     background-color: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
-  aside, .bottom-nav, button {
+  /* Hide everything that shouldn't print */
+  aside, .bottom-nav, .no-print, nav {
     display: none !important;
+  }
+  /* The admin sidebar */
+  .admin-sidebar {
+    display: none !important;
+  }
+  /* Make the main content full width */
+  .admin-content, main, [class*="max-w-"] {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  /* Report card looks clean */
+  #impact-report-printable {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  /* Preserve background colors */
+  #impact-report-printable [style*="background"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .card {
     border: none !important;
@@ -213,6 +242,17 @@ html, body {
   }
   /* Force charts to render cleanly */
   .recharts-wrapper {
+    page-break-inside: avoid;
+  }
+  /* Tabs - hide */
+  [class*="border-b"][class*="gap-1"] {
+    display: none !important;
+  }
+  /* Page breaks */
+  h3 {
+    page-break-after: avoid;
+  }
+  .grid {
     page-break-inside: avoid;
   }
 }

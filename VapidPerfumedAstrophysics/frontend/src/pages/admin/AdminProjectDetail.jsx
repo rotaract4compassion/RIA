@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MapHeatmap from '../../components/MapHeatmap';
 import { downloadCSV } from '../../lib/exportUtils';
-import { AlertTriangle, MapPin, Printer, Download } from 'lucide-react';
+import { AlertTriangle, MapPin, Printer, Download, Upload } from 'lucide-react';
 
 // Simple heatmap component
 function RegionHeatmap({ data }) {
@@ -70,6 +70,8 @@ export default function AdminProjectDetail() {
   const [analytics, setAnalytics] = useState(null);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
+  const reportStartRef = useRef('');
+  const reportEndRef = useRef('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -268,58 +270,197 @@ export default function AdminProjectDetail() {
       {/* Impact report tab */}
       {tab === 'impact-report' && (
         <div className="flex flex-col gap-6">
+          {/* Season / Round filter */}
+          <div className="flex items-center gap-3 flex-wrap no-print">
+            <label className="text-xs font-medium text-gray-500">Date range (season/round):</label>
+            <input type="date" className="input-field py-1.5 text-sm w-auto"
+              onChange={e => { reportStartRef.current = e.target.value; }} />
+            <span className="text-gray-400 text-xs">to</span>
+            <input type="date" className="input-field py-1.5 text-sm w-auto"
+              onChange={e => { reportEndRef.current = e.target.value; }} />
+            <button onClick={() => {
+              const qs = new URLSearchParams();
+              if (reportStartRef.current) qs.set('start_date', reportStartRef.current);
+              if (reportEndRef.current) qs.set('end_date', reportEndRef.current);
+              api.get(`/submissions/admin/${id}/impact-report?${qs}`).then(setReport);
+            }} className="btn-primary w-auto px-4 py-1.5 text-xs">Generate</button>
+          </div>
+
           {!report ? (
             <div className="flex justify-center py-12"><LoadingSpinner /></div>
           ) : (
             <>
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">{report.project?.name}</h2>
-                    <p className="text-gray-500 text-sm mt-1">{report.project?.description}</p>
+              {/* ===== PRINTABLE REPORT ===== */}
+              <div id="impact-report-printable" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                {/* Report Header */}
+                <div className="px-8 pt-8 pb-6 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #fdf2f8 0%, #ede9fe 100%)' }}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Impact Report</p>
+                      <h2 className="text-2xl font-extrabold text-gray-900">{report.project?.name}</h2>
+                      {report.project?.club_org && <p className="text-sm text-gray-500 mt-1">{report.project.club_org}</p>}
+                      {report.project?.description && <p className="text-sm text-gray-600 mt-2 max-w-lg leading-relaxed">{report.project.description}</p>}
+                    </div>
+                    <img src="/icons/ria-app-icon-whitebg-192.png" alt="Ria" className="w-14 h-14 rounded-2xl shadow-sm" />
                   </div>
-                  <img src="/icons/ria-app-icon-whitebg-192.png" alt="Ria" className="w-10 h-10 rounded-xl" />
+                  <div className="flex items-center gap-4 mt-4 text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                    {report.stats?.first_submission && <span>From: {new Date(report.stats.first_submission).toLocaleDateString()}</span>}
+                    {report.stats?.last_submission && <span>To: {new Date(report.stats.last_submission).toLocaleDateString()}</span>}
+                    <span>Generated: {new Date(report.generated_at).toLocaleDateString()}</span>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  {[
-                    { v: report.stats?.total_submissions, l: 'Submissions' },
-                    { v: report.stats?.unique_participants, l: 'Participants' },
-                    { v: report.regions?.length, l: 'Regions' },
-                    { v: Math.round(report.stats?.total_minutes || 0), l: 'Minutes of impact' },
-                  ].map(({ v, l }) => (
-                    <div key={l} className="text-center bg-gray-50 rounded-xl p-4">
-                      <p className="text-2xl font-bold text-gray-900">{v ?? '—'}</p>
-                      <p className="text-xs text-gray-500 mt-1">{l}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {report.regions?.length > 0 && (
-                  <div className="mb-4">
-                    <h3 className="font-semibold text-sm text-gray-700 mb-2">Regions covered</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {report.regions.map(r => (
-                        <span key={r.region} className="badge bg-gray-100 text-gray-600">{r.region} ({r.count})</span>
-                      ))}
-                    </div>
+                <div className="px-8 py-6 flex flex-col gap-8">
+                  {/* KPI Cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { v: report.stats?.total_submissions, l: 'Total Submissions', color: '#E91E8C' },
+                      { v: report.stats?.unique_participants, l: 'Volunteers', color: '#17458F' },
+                      { v: report.regions?.length || 0, l: 'Regions Reached', color: '#F7A81B' },
+                      { v: Math.round(report.stats?.total_minutes || 0), l: 'Minutes of Impact', color: '#10B981' },
+                    ].map(({ v, l, color }) => (
+                      <div key={l} className="text-center rounded-xl p-4 border" style={{ borderColor: color + '30', backgroundColor: color + '08' }}>
+                        <p className="text-3xl font-extrabold" style={{ color }}>{parseInt(v || 0).toLocaleString()}</p>
+                        <p className="text-[11px] text-gray-500 mt-1 font-medium">{l}</p>
+                      </div>
+                    ))}
                   </div>
-                )}
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100 text-xs text-gray-400">
-                  <span>In partnership with Rotary International, Rotaract Tanzania, Rotaract Muhimbili, Nama Labs</span>
-                  <span>Generated {new Date(report.generated_at).toLocaleDateString()}</span>
+                  {/* Trend Chart (simple bar) */}
+                  {report.trend?.length > 0 && (
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-700 mb-3">Submissions Over Time</h3>
+                      <div className="flex items-end gap-[2px] h-24 bg-gray-50 rounded-lg p-2">
+                        {report.trend.map(({ date, count }) => {
+                          const max = Math.max(...report.trend.map(t => parseInt(t.count)));
+                          return (
+                            <div key={date} className="flex-1 group relative" title={`${new Date(date).toLocaleDateString()}: ${count}`}>
+                              <div
+                                className="w-full rounded-t transition-all"
+                                style={{
+                                  height: `${(parseInt(count) / max) * 100}%`,
+                                  backgroundColor: 'var(--color-primary)',
+                                  opacity: 0.75,
+                                  minHeight: 2,
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-between text-[9px] text-gray-400 mt-1 px-1">
+                        <span>{report.trend.length > 0 ? new Date(report.trend[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
+                        <span>{report.trend.length > 0 ? new Date(report.trend[report.trend.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Regions */}
+                  {report.regions?.length > 0 && (
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-700 mb-3">Regional Distribution</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {report.regions.map(r => (
+                          <div key={r.region} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                            <span className="text-sm text-gray-700 truncate">{r.region}</span>
+                            <span className="text-sm font-bold text-gray-900 ml-2">{r.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Field Answer Distributions */}
+                  {report.field_aggregates && Object.keys(report.field_aggregates).length > 0 && (
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-700 mb-3">Response Breakdown</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(report.field_aggregates)
+                          .filter(([, vals]) => Object.keys(vals).length <= 10 && Object.keys(vals).length > 1)
+                          .slice(0, 6)
+                          .map(([field, vals]) => {
+                            const total = Object.values(vals).reduce((a, b) => a + b, 0);
+                            const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                            const COLORS = ['#E91E8C', '#17458F', '#F7A81B', '#10B981', '#9C27B0', '#FF5722'];
+                            return (
+                              <div key={field} className="bg-gray-50 rounded-lg p-3">
+                                <p className="text-[11px] font-bold uppercase text-gray-400 tracking-wide mb-2">{field.replace(/_/g, ' ')}</p>
+                                <div className="flex flex-col gap-1.5">
+                                  {sorted.map(([val, count], ci) => (
+                                    <div key={val} className="flex items-center gap-2">
+                                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full" style={{ width: `${(count / total) * 100}%`, backgroundColor: COLORS[ci % COLORS.length] }} />
+                                      </div>
+                                      <span className="text-[10px] text-gray-600 w-20 truncate">{val}</span>
+                                      <span className="text-[10px] font-bold text-gray-800 w-6 text-right">{count}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Participants */}
+                  {report.participants?.length > 0 && (
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-700 mb-3">Contributors ({report.participants.length})</h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {report.participants.map((p, i) => (
+                          <span key={i} className="text-[11px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">{p.name}{p.club ? ` (${p.club})` : ''}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 text-[10px] text-gray-400">
+                    <div className="flex items-center gap-3">
+                      <span>In partnership with Rotary International, Rotaract Tanzania, Rotaract Muhimbili, Nama Labs</span>
+                    </div>
+                    <span>Powered by Ria</span>
+                  </div>
                 </div>
               </div>
 
-              <button
-                onClick={() => window.print()}
-                className="btn-primary w-auto self-end px-6"
-              >
-                Print / Download PDF
-              </button>
+              {/* Actions */}
+              <div className="flex gap-3 no-print">
+                <button onClick={() => window.print()} className="btn-primary w-auto px-6 flex items-center gap-2">
+                  <Printer size={16} /> Download PDF
+                </button>
+              </div>
             </>
           )}
+
+          {/* CSV Import */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm no-print">
+            <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><Upload size={18} /> Import Data (CSV)</h3>
+            <p className="text-xs text-gray-500 mb-3">Upload a CSV file to bulk-import submission data into this project. Column headers should match your questionnaire field IDs.</p>
+            <input type="file" accept=".csv" className="text-sm text-gray-500" onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const text = await file.text();
+              const lines = text.split('\n').filter(Boolean);
+              if (lines.length < 2) { alert('CSV must have a header row and at least one data row.'); return; }
+              const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+              const rows = lines.slice(1).map(line => {
+                const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                const obj = {};
+                headers.forEach((h, i) => { if (vals[i]) obj[h] = vals[i]; });
+                return { answers: obj, region: obj.region || null, submitted_at: obj.submitted_at || null };
+              });
+              if (!confirm(`Import ${rows.length} rows into "${project.name}"?`)) return;
+              try {
+                const res = await api.post(`/submissions/admin/${id}/import`, { rows });
+                alert(`Imported ${res.imported} of ${res.total} rows. ${res.errors ? res.errors + ' errors.' : ''}`);
+                load();
+              } catch (err) {
+                alert('Import failed: ' + err.message);
+              }
+            }} />
+          </div>
         </div>
       )}
 
