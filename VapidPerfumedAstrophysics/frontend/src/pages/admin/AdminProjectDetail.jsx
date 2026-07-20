@@ -214,6 +214,44 @@ export default function AdminProjectDetail() {
               >
                 <Edit3 size={14} /> {csvPreview ? 'Close Editor' : 'Edit Before Export'}
               </button>
+              <button
+                onClick={async () => {
+                  const element = document.getElementById('impact-report-printable');
+                  if (!element) return;
+                  
+                  // Dynamically load html2pdf if not present
+                  if (!window.html2pdf) {
+                    await new Promise((resolve, reject) => {
+                      const script = document.createElement('script');
+                      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                      script.onload = resolve;
+                      script.onerror = reject;
+                      document.head.appendChild(script);
+                    });
+                  }
+                  
+                  const opt = {
+                    margin:       [0.5, 0.5, 0.5, 0.5],
+                    filename:     `${project.name.replace(/[^a-z0-9]/gi, '_')}_Impact_Report.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, logging: false },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                  };
+                  
+                  // Hide elements that shouldn't be in the PDF
+                  const noPrintElements = element.querySelectorAll('.no-print');
+                  noPrintElements.forEach(el => el.style.display = 'none');
+                  
+                  // Generate PDF
+                  window.html2pdf().set(opt).from(element).save().then(() => {
+                    // Restore hidden elements
+                    noPrintElements.forEach(el => el.style.display = '');
+                  });
+                }}
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
+              >
+                <Printer size={14} /> Download PDF
+              </button>
             </div>
           </div>
 
@@ -556,8 +594,32 @@ export default function AdminProjectDetail() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 no-print">
-                <button onClick={() => window.print()} className="btn-primary w-auto px-6 flex items-center gap-2">
+              <div className="flex gap-3 no-print mt-6">
+                <button onClick={async () => {
+                  const element = document.getElementById('impact-report-printable');
+                  if (!element) return;
+                  
+                  // Dynamically load html2pdf if not present
+                  if (!window.html2pdf) {
+                    await new Promise((resolve, reject) => {
+                      const script = document.createElement('script');
+                      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                      script.onload = resolve;
+                      script.onerror = reject;
+                      document.head.appendChild(script);
+                    });
+                  }
+                  
+                  const opt = {
+                    margin:       [0.5, 0.5, 0.5, 0.5],
+                    filename:     `${report.project?.name.replace(/[^a-z0-9]/gi, '_')}_Impact_Report.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, logging: false },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                  };
+                  
+                  window.html2pdf().set(opt).from(element).save();
+                }} className="btn-primary w-auto px-6 flex items-center gap-2">
                   <Printer size={16} /> Download PDF
                 </button>
               </div>
@@ -565,9 +627,11 @@ export default function AdminProjectDetail() {
           )}
 
           {/* CSV Import */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm no-print">
-            <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><Upload size={18} /> Import Data (CSV)</h3>
-            <p className="text-xs text-gray-500 mb-4">Upload a CSV file to bulk-import submission data into this project. Column headers should match your questionnaire field IDs.</p>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm no-print mt-8">
+            <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><Upload size={18} /> Import Historical Data (CSV)</h3>
+            <p className="text-xs text-gray-500 mb-4">
+              Upload a CSV file to bulk-import historical data into this project. <strong>It does not need to be uniform.</strong> Old data with different column names will be safely archived and stored as-is without data loss.
+            </p>
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
               <div className="flex-1 w-full">
@@ -577,7 +641,7 @@ export default function AdminProjectDetail() {
                 <input 
                   type="text" 
                   id="csv-import-tag"
-                  placeholder="e.g. Season 1, Q2 2026..." 
+                  placeholder="e.g. Historical 2023, Season 1..." 
                   className="input-field py-1.5 text-sm w-full bg-white"
                 />
               </div>
