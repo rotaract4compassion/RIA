@@ -208,10 +208,15 @@ VALUES
   ('first_submission', 'First Submission', 'Uwasilishaji wa Kwanza', 'Submit your first project data', 'Wasilisha data yako ya kwanza ya mradi', '🌟', 1, 'submissions'),
   ('5_submissions', '5 Submissions', 'Uwasilishaji 5', 'Submit data 5 times', 'Wasilisha data mara 5', '🏅', 5, 'submissions'),
   ('25_submissions', 'Data Champion', 'Bingwa wa Data', 'Submit data 25 times', 'Wasilisha data mara 25', '🏆', 25, 'submissions'),
+  ('50_submissions', 'Impact Master', 'Mkuu wa Athari', 'Submit data 50 times', 'Wasilisha data mara 50', '🔥', 50, 'submissions'),
+  ('100_submissions', 'Legend', 'Shujaa', 'Submit data 100 times', 'Wasilisha data mara 100', '👑', 100, 'submissions'),
   ('3_regions', 'Region Explorer', 'Mchunguzi wa Mkoa', 'Work in 3 different regions', 'Fanya kazi katika mikoa 3 tofauti', '🗺️', 3, 'regions'),
   ('5_regions', 'Multi-Region Hero', 'Shujaa wa Mikoa Mingi', 'Work in 5 different regions', 'Fanya kazi katika mikoa 5', '🌍', 5, 'regions'),
+  ('10_regions', 'National Hero', 'Shujaa wa Taifa', 'Work in 10 different regions', 'Fanya kazi katika mikoa 10 tofauti', '🦅', 10, 'regions'),
   ('30_days', 'Month of Service', 'Mwezi wa Huduma', 'Active for 30 days', 'Amilifu kwa siku 30', '📅', 30, 'tenure_days'),
-  ('3_projects', 'Multi-Project Volunteer', 'Mwanakuzi wa Miradi Mingi', 'Contribute to 3 projects', 'Changia katika miradi 3', '📋', 3, 'projects')
+  ('180_days', 'Half-Year Hero', 'Shujaa wa Nusu Mwaka', 'Active for 180 days', 'Amilifu kwa siku 180', '⏳', 180, 'tenure_days'),
+  ('3_projects', 'Multi-Project Volunteer', 'Mwanakuzi wa Miradi Mingi', 'Contribute to 3 projects', 'Changia katika miradi 3', '📋', 3, 'projects'),
+  ('10_projects', 'Global Citizen', 'Raia wa Dunia', 'Contribute to 10 projects', 'Changia katika miradi 10', '🌐', 10, 'projects')
 ON CONFLICT (key) DO NOTHING;
 
 -- Migration helpers: safely add columns if upgrading from v1 schema

@@ -284,7 +284,7 @@ router.get('/admin/:projectId/impact-report', requireAdmin, async (req, res) => 
         COUNT(DISTINCT user_id) as unique_participants,
         MIN(submitted_at) as first_submission,
         MAX(submitted_at) as last_submission,
-        COALESCE(SUM((answers->>'minutes_of_impact')::numeric), 0) as total_minutes
+        COUNT(DISTINCT DATE(submitted_at)) as active_days
        FROM submissions s WHERE s.project_id = $1${dateFilter}`,
       params
     ),

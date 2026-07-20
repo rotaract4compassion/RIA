@@ -449,7 +449,7 @@ export default function AdminProjectDetail() {
                       { v: report.stats?.total_submissions, l: 'Total Submissions', color: '#E91E8C' },
                       { v: report.stats?.unique_participants, l: 'Volunteers', color: '#17458F' },
                       { v: report.regions?.length || 0, l: 'Regions Reached', color: '#F7A81B' },
-                      { v: Math.round(report.stats?.total_minutes || 0), l: 'Minutes of Impact', color: '#10B981' },
+                      { v: report.stats?.active_days || 0, l: 'Active Days', color: '#10B981' },
                     ].map(({ v, l, color }) => (
                       <div key={l} className="text-center rounded-xl p-4 border" style={{ borderColor: color + '30', backgroundColor: color + '08' }}>
                         <p className="text-3xl font-extrabold" style={{ color }}>{parseInt(v || 0).toLocaleString()}</p>
